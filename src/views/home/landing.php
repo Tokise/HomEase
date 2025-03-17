@@ -173,7 +173,7 @@
     <div class="container">
         <h2 class="section-title">What Our Customers Say</h2>
         <div class="testimonials-grid">
-            <div class="testimonial-card">
+            <div class="testimonial-card" data-delay="0">
                 <div class="testimonial-content">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
@@ -195,7 +195,7 @@
                 </div>
             </div>
             
-            <div class="testimonial-card">
+            <div class="testimonial-card" data-delay="200">
                 <div class="testimonial-content">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
@@ -217,7 +217,7 @@
                 </div>
             </div>
             
-            <div class="testimonial-card">
+            <div class="testimonial-card" data-delay="400">
                 <div class="testimonial-content">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
@@ -257,24 +257,55 @@
 </section>
 
 <script>
-    // Add any page-specific JavaScript here
     document.addEventListener('DOMContentLoaded', function() {
-        // Animation for the cards
-        const animateOnScroll = document.querySelectorAll('.step-card, .feature-card, .service-card, .testimonial-card');
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                    observer.unobserve(entry.target);
+        // Animate elements when they come into view
+        const animateOnScroll = function() {
+            const cards = document.querySelectorAll('.step-card, .feature-card, .service-card, .testimonial-card');
+            
+            cards.forEach(card => {
+                const cardPosition = card.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.2;
+                
+                if (cardPosition < screenPosition) {
+                    // Check if the card has a delay attribute
+                    const delay = card.getAttribute('data-delay');
+                    if (delay) {
+                        setTimeout(() => {
+                            card.classList.add('animated');
+                        }, parseInt(delay));
+                    } else {
+                        card.classList.add('animated');
+                    }
                 }
             });
-        }, {
-            threshold: 0.1
-        });
+        };
         
-        animateOnScroll.forEach(item => {
-            observer.observe(item);
+        // Run on load
+        animateOnScroll();
+        
+        // Run on scroll
+        window.addEventListener('scroll', animateOnScroll);
+        
+        // Handle missing testimonial avatar images
+        document.querySelectorAll('.testimonial-avatar img').forEach(img => {
+            img.onerror = function() {
+                // Replace with a default avatar if image fails to load
+                this.src = `${APP_URL}/assets/img/default-avatar.jpg`;
+                
+                // If the default also fails, use an initial avatar
+                this.onerror = function() {
+                    const parent = this.closest('.testimonial-author');
+                    const nameElement = parent.querySelector('.testimonial-info h4');
+                    const name = nameElement ? nameElement.textContent.trim() : 'User';
+                    const initial = name.charAt(0).toUpperCase();
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'initial-avatar';
+                    avatar.textContent = initial;
+                    
+                    this.parentNode.replaceChild(avatar, this);
+                };
+            };
         });
     });
 </script>
