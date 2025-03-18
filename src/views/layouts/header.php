@@ -22,12 +22,16 @@ if (strpos($uri, '/services') !== false) {
     <!-- Favicon -->
     <link rel="icon" href="<?= APP_URL ?>/assets/img/favicon.ico" type="image/x-icon">
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/main.css">
-    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/main.css">
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
     
     <!-- Page specific CSS -->
     <?php if ($currentPage === 'home'): ?>

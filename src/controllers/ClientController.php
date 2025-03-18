@@ -6,6 +6,7 @@
 require_once SRC_PATH . '/controllers/Controller.php';
 require_once SRC_PATH . '/models/User.php';
 require_once SRC_PATH . '/models/Service.php';
+require_once SRC_PATH . '/models/Booking.php';
 
 class ClientController extends Controller {
     private $userModel;
@@ -19,51 +20,33 @@ class ClientController extends Controller {
         parent::__construct();
         $this->userModel = new User();
         $this->serviceModel = new Service();
-        
-        // Create Booking model with empty data for now
-        // In a real implementation, you would integrate with the actual Booking model
-        $this->bookingModel = new stdClass();
-        $this->bookingModel->upcomingBookings = [];
-        $this->bookingModel->recentBookings = [];
-        $this->bookingModel->allBookings = [];
+        $this->bookingModel = new Booking();
     }
 
     /**
      * Display client dashboard
      */
     public function dashboard() {
-        // Check if user is logged in and is a client
-        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] !== 'client') {
-            $_SESSION['flash_message'] = 'You must be logged in as a client to access this page';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/auth/login');
-            return;
-        }
+        // Require client authentication
+        $this->requireRole(ROLE_CLIENT);
 
-        $userId = $_SESSION['user_id'];
-        $user = $this->userModel->findById($userId);
-
-        if (!$user) {
-            $_SESSION['flash_message'] = 'User not found';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/auth/login');
-            return;
-        }
-
-        // Get featured services
+        // Get user data
+        $user = $this->getCurrentUser();
+        
+        // Get user's bookings and featured services
+        $upcomingBookings = $this->bookingModel->getUpcomingBookings($user['id']);
+        $recentBookings = $this->bookingModel->getRecentBookings($user['id']);
         $featuredServices = $this->serviceModel->getFeatured(4);
 
         // Render dashboard view
-        $viewData = [
+        $this->render('client/dashboard', [
+            'title' => 'Dashboard',
             'user' => $user,
-            'upcomingBookings' => $this->bookingModel->upcomingBookings,
-            'recentBookings' => $this->bookingModel->recentBookings,
+            'upcomingBookings' => $upcomingBookings,
+            'recentBookings' => $recentBookings,
             'featuredServices' => $featuredServices,
-            'title' => 'Client Dashboard',
-            'css' => ['dashboard.css']
-        ];
-
-        $this->render('client/dashboard', $viewData);
+            'styles' => ['dashboard']
+        ]);
     }
 
     /**
@@ -168,10 +151,21 @@ class ClientController extends Controller {
             return;
         }
 
+        // Get user data
+        $user = $this->getCurrentUser();
+        if (!$user) {
+            $_SESSION['flash_message'] = 'User not found';
+            $_SESSION['flash_type'] = 'danger';
+            $this->redirect(APP_URL . '/auth/login');
+            return;
+        }
+
         $viewData = [
-            'bookings' => $this->bookingModel->allBookings,
+            'user' => $user,
+            'bookings' => $this->bookingModel->getAllBookings($_SESSION['user_id']),
             'title' => 'My Bookings',
-            'css' => ['bookings.css']
+            'styles' => ['bookings'],
+            'scripts' => ['bookings']
         ];
 
         $this->render('client/bookings', $viewData);
@@ -277,5 +271,28 @@ class ClientController extends Controller {
             </table>
         </div>
         <?php
+    }
+
+    /**
+     * Get Bootstrap badge class based on booking status
+     * 
+     * @param string $status Booking status
+     * @return string Bootstrap badge class
+     */
+    public function getBookingStatusClass($status) {
+        switch (strtolower($status)) {
+            case 'pending':
+                return 'warning';
+            case 'confirmed':
+                return 'info';
+            case 'in progress':
+                return 'primary';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
     }
 } 

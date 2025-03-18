@@ -1,3 +1,8 @@
+/* 
+ * HomEase - CSS Variables
+ * Single source of truth for CSS variables
+ */
+
 :root {
     /* Color Palette - Modern and Professional */
     --color-primary: #4e7df1;       /* Bright blue - primary brand color */

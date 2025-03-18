@@ -14,11 +14,13 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     google_id VARCHAR(255) UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     profile_picture VARCHAR(255),
     phone_number VARCHAR(20),
     role_id TINYINT NOT NULL DEFAULT 3, -- Default to client role
+    email_verified BOOLEAN DEFAULT FALSE,
     address VARCHAR(255),
     city VARCHAR(100),
     state VARCHAR(100),
@@ -28,6 +30,18 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- User Tokens table for Remember Me functionality
+CREATE TABLE user_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expiry DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY token (token),
+    KEY user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Service Categories
 CREATE TABLE service_categories (

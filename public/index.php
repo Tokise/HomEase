@@ -4,6 +4,17 @@
  * Main Entry Point
  */
 
+// Enable error reporting based on environment
+if (defined('DEBUG_MODE') && DEBUG_MODE) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+}
+
 // Add function declarations for linter
 if (!function_exists('dirname')) {
     /**
@@ -31,134 +42,96 @@ require_once CONFIG_PATH . '/config.php';
 // Start session
 session_start();
 
-// Route handling
-$request = $_SERVER['REQUEST_URI'];
-$basePath = str_replace('/index.php', '', $_SERVER['SCRIPT_NAME']);
-$path = str_replace($basePath, '', $request);
-
-// Handle URL parameters
-$queryString = '';
-if (strpos($path, '?') !== false) {
-    list($path, $queryString) = explode('?', $path, 2);
-}
-
-// Debug for routing - comment out in production
-if (DEBUG_MODE) {
-    echo "<pre>Request: " . htmlspecialchars($request) . "\n";
-    echo "Base Path: " . htmlspecialchars($basePath) . "\n";
-    echo "Path: " . htmlspecialchars($path) . "\n";
-    
-    // Check for controller/action parameters in query string
-    if (!empty($queryString)) {
-        parse_str($queryString, $queryParams);
-        if (isset($queryParams['controller']) && isset($queryParams['action'])) {
-            echo "Controller from query: " . htmlspecialchars($queryParams['controller']) . "\n";
-            echo "Action from query: " . htmlspecialchars($queryParams['action']) . "\n";
-        }
-    }
-}
-
-// Extract route segments
-$routeSegments = explode('/', trim($path, '/'));
-
-// Debug continued
-if (DEBUG_MODE) {
-    echo "Route Segments: ";
-    print_r($routeSegments);
-    echo "</pre>";
-}
-
-// Extract controller and action from query string if present
-$controller = 'home'; // Default controller
-$action = 'index';    // Default action
-
-if (!empty($queryString)) {
-    parse_str($queryString, $queryParams);
-    if (isset($queryParams['controller'])) {
-        $controller = $queryParams['controller'];
-    }
-    if (isset($queryParams['action'])) {
-        $action = $queryParams['action'];
-    }
-} else {
-    // Otherwise get from URL segments
-    // If accessing directly as /HomEase/ or /HomEase/public/ 
-    if (empty($routeSegments) || (count($routeSegments) == 1 && strtolower($routeSegments[0]) === 'homeease')) {
-        // Use defaults (already set)
-    } else {
-        // Get controller and action from URL
-        $controller = !empty($routeSegments[0]) ? $routeSegments[0] : 'home';
-        $action = isset($routeSegments[1]) ? $routeSegments[1] : 'index';
-    }
-}
-
-// Remove any potential dangerous characters
-$controller = preg_replace('/[^a-zA-Z0-9_]/', '', $controller);
-$action = preg_replace('/[^a-zA-Z0-9_]/', '', $action);
-
-// Parameters are everything after the controller and action
-$params = array_slice($routeSegments, 2);
-
-// Load and execute controller
-$controllerClass = ucfirst($controller) . 'Controller';
-$controllerFile = SRC_PATH . '/controllers/' . $controllerClass . '.php';
-
-// Make sure any debug output is cleared if we're going to render a page
-if (ob_get_length()) {
-    ob_clean();
-}
-
-// Check if ErrorController.php exists first, so we can use it for error handling
-$errorControllerFile = SRC_PATH . '/controllers/ErrorController.php';
-$errorControllerExists = file_exists($errorControllerFile);
-
 try {
-    if (file_exists($controllerFile)) {
-        require_once $controllerFile;
+    // Get the request URI and script name
+    $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+    
+    // Remove base path from request URI
+    $basePath = '/HomEase';
+    $requestUri = str_replace($basePath, '', $requestUri);
+    $requestUri = str_replace('/public', '', $requestUri);
+    $requestUri = str_replace('/index.php', '', $requestUri);
+    
+    // Clean up the request URI
+    $path = trim($requestUri, '/');
+    
+    // Handle empty path (root URL)
+    if (empty($path)) {
+        $controller = 'home';
+        $action = 'index';
+        $params = [];
+    } else {
+        // Split the path into segments
+        $segments = explode('/', $path);
         
-        if (class_exists($controllerClass)) {
-            $controllerInstance = new $controllerClass();
-            
-            if (method_exists($controllerInstance, $action)) {
-                call_user_func_array([$controllerInstance, $action], $params);
-            } else {
-                // Action not found
-                if ($errorControllerExists) {
-                    require_once $errorControllerFile;
-                    $errorController = new ErrorController();
-                    $errorController->notFound();
-                } else {
-                    // Fallback error if ErrorController doesn't exist
-                    echo "<h1>404 Not Found</h1><p>The requested action '{$action}' was not found.</p>";
-                }
-            }
-        } else {
-            // Controller class doesn't exist in the file
-            if ($errorControllerExists) {
-                require_once $errorControllerFile;
-                $errorController = new ErrorController();
-                $errorController->notFound();
-            } else {
-                echo "<h1>404 Not Found</h1><p>Controller class '{$controllerClass}' was not found.</p>";
-            }
-        }
-    } else {
-        // Controller file doesn't exist
-        if ($errorControllerExists) {
-            require_once $errorControllerFile;
-            $errorController = new ErrorController();
-            $errorController->notFound();
-        } else {
-            echo "<h1>404 Not Found</h1><p>Controller file for '{$controller}' was not found.</p>";
+        // Get controller, action, and parameters
+        $controller = !empty($segments[0]) ? strtolower($segments[0]) : 'home';
+        $action = isset($segments[1]) ? strtolower($segments[1]) : 'index';
+        $params = array_slice($segments, 2);
+    }
+
+    // Debug logging
+    if (DEBUG_MODE) {
+        error_log("Route Debug - URI: " . $requestUri);
+        error_log("Route Debug - Controller: " . $controller);
+        error_log("Route Debug - Action: " . $action);
+        error_log("Route Debug - Params: " . implode(', ', $params));
+    }
+
+    // Load the base Controller class
+    require_once SRC_PATH . '/controllers/Controller.php';
+
+    // Construct controller class name and file path
+    $controllerClass = ucfirst($controller) . 'Controller';
+    $controllerFile = SRC_PATH . '/controllers/' . $controllerClass . '.php';
+
+    // Check if controller file exists
+    if (!file_exists($controllerFile)) {
+        throw new Exception("Controller not found: " . $controllerClass);
+    }
+
+    // Load the controller file
+    require_once $controllerFile;
+
+    // Check if controller class exists
+    if (!class_exists($controllerClass)) {
+        throw new Exception("Controller class not found: " . $controllerClass);
+    }
+
+    // Create controller instance
+    $controllerInstance = new $controllerClass();
+
+    // Find the correct method name (case-insensitive)
+    $methods = get_class_methods($controllerInstance);
+    $methodFound = false;
+    $correctMethodName = '';
+
+    foreach ($methods as $method) {
+        if (strtolower($method) === $action) {
+            $methodFound = true;
+            $correctMethodName = $method;
+            break;
         }
     }
+
+    if (!$methodFound) {
+        throw new Exception("Action not found: " . $action . " in " . $controllerClass);
+    }
+
+    // Call the controller action with parameters
+    call_user_func_array([$controllerInstance, $correctMethodName], $params);
+
 } catch (Exception $e) {
-    // Handle any exceptions
-    if ($errorControllerExists) {
-        require_once $errorControllerFile;
-        $errorController = new ErrorController();
-        $errorController->serverError();
-    } else {
-        echo "<h1>500 Server Error</h1><p>An error occurred: " . htmlspecialchars($e->getMessage()) . "</p>";
+    // Log the error
+    error_log("HomEase Error: " . $e->getMessage());
+    
+    if (DEBUG_MODE) {
+        error_log("Stack trace: " . $e->getTraceAsString());
     }
+    
+    // Load and display error page
+    require_once SRC_PATH . '/controllers/ErrorController.php';
+    $errorController = new ErrorController();
+    $errorController->serverError();
 } 

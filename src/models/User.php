@@ -4,52 +4,57 @@
  */
 class User {
     private $db;
+    private $table = 'users';
     
     public function __construct() {
-        require_once SRC_PATH . '/utils/Database.php';
-        $this->db = Database::getInstance();
+        require_once SRC_PATH . '/database/Database.php';
+        $this->db = Database::getInstance()->getConnection();
+        
+        if (!$this->db) {
+            throw new Exception("Failed to connect to database");
+        }
     }
     
     /**
      * Find user by ID
      */
     public function findById($id) {
-        $id = $this->db->escapeString($id);
-        $result = $this->db->query("SELECT * FROM users WHERE id = {$id} LIMIT 1");
-        
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Error finding user by ID: " . $e->getMessage());
+            return false;
         }
-        
-        return null;
     }
     
     /**
      * Find user by email
      */
     public function findByEmail($email) {
-        $email = $this->db->escapeString($email);
-        $result = $this->db->query("SELECT * FROM users WHERE email = '{$email}' LIMIT 1");
-        
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Error finding user by email: " . $e->getMessage());
+            return false;
         }
-        
-        return null;
     }
     
     /**
      * Find user by Google ID
      */
     public function findByGoogleId($googleId) {
-        $googleId = $this->db->escapeString($googleId);
-        $result = $this->db->query("SELECT * FROM users WHERE google_id = '{$googleId}' LIMIT 1");
-        
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE google_id = ? LIMIT 1");
+            $stmt->execute([$googleId]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Error finding user by Google ID: " . $e->getMessage());
+            return false;
         }
-        
-        return null;
     }
     
     /**
@@ -57,221 +62,214 @@ class User {
      */
     public function create($userData) {
         try {
-            // Begin transaction for data integrity
-            $this->db->beginTransaction();
+            if (empty($userData)) {
+                throw new Exception("No user data provided");
+            }
+
+            $fields = [];
+            $values = [];
+            $params = [];
             
-            $email = $this->db->escapeString($userData['email']);
-            $firstName = $this->db->escapeString($userData['first_name']);
-            $lastName = $this->db->escapeString($userData['last_name']);
-            $googleId = isset($userData['google_id']) ? "'" . $this->db->escapeString($userData['google_id']) . "'" : 'NULL';
-            $profilePicture = isset($userData['profile_picture']) ? "'" . $this->db->escapeString($userData['profile_picture']) . "'" : 'NULL';
-            $password = isset($userData['password']) ? "'" . $this->db->escapeString($userData['password']) . "'" : 'NULL';
-            $phone = isset($userData['phone_number']) ? "'" . $this->db->escapeString($userData['phone_number']) . "'" : 'NULL';
-            $roleId = isset($userData['role_id']) ? (int)$userData['role_id'] : ROLE_CLIENT;
-            
-            $query = "INSERT INTO users (email, first_name, last_name, google_id, profile_picture, password, phone_number, role_id, created_at) 
-                    VALUES ('{$email}', '{$firstName}', '{$lastName}', {$googleId}, {$profilePicture}, {$password}, {$phone}, {$roleId}, NOW())";
-            
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("User create query: " . $query);
+            foreach ($userData as $field => $value) {
+                if ($value !== null) {
+                    $fields[] = $field;
+                    $values[] = '?';
+                    $params[] = $value;
+                }
             }
             
-            try {
-                $result = $this->db->query($query);
-                $newId = $this->db->getLastInsertId();
-                
-                if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                    error_log("User created with ID: " . $newId);
-                }
-                
-                if ($newId) {
-                    // Commit transaction
-                    $this->db->commit();
-                    return $newId;
-                } else {
-                    // Rollback on failure
-                    $this->db->rollback();
-                    error_log("Failed to get insert ID after user creation");
-                    return false;
-                }
-            } catch (Exception $e) {
-                // Rollback on exception
-                $this->db->rollback();
-                if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                    error_log("Error creating user: " . $e->getMessage());
-                }
-                return false;
-            }
-        } catch (Exception $e) {
+            $sql = "INSERT INTO users (" . implode(', ', $fields) . ") 
+                    VALUES (" . implode(', ', $values) . ")";
+            
             if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("Exception in user creation: " . $e->getMessage());
+                error_log("SQL Insert: " . $sql);
+                error_log("Insert params: " . json_encode($params));
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Failed to prepare SQL statement: " . $this->db->error);
+            }
+
+            $result = $stmt->execute($params);
+            
+            if (!$result) {
+                if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                    error_log("SQL Error: " . json_encode($stmt->errorInfo()));
+                }
+                throw new Exception("Failed to execute SQL statement: " . implode(", ", $stmt->errorInfo()));
+            }
+            
+            $lastId = $this->db->lastInsertId();
+            
+            if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                error_log("Last insert ID: " . $lastId);
+            }
+            
+            return $lastId;
+        } catch (PDOException $e) {
+            error_log("Error creating user: " . $e->getMessage());
+            if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                error_log("User data: " . json_encode($userData));
+                error_log("Error trace: " . $e->getTraceAsString());
             }
             return false;
         }
     }
     
     /**
-     * Update existing user
+     * Update user
      */
     public function update($id, $userData) {
-        $sets = [];
-        
-        if (isset($userData['email'])) {
-            $sets[] = "email = '" . $this->db->escapeString($userData['email']) . "'";
-        }
-        
-        if (isset($userData['first_name'])) {
-            $sets[] = "first_name = '" . $this->db->escapeString($userData['first_name']) . "'";
-        }
-        
-        if (isset($userData['last_name'])) {
-            $sets[] = "last_name = '" . $this->db->escapeString($userData['last_name']) . "'";
-        }
-        
-        if (isset($userData['profile_picture'])) {
-            $sets[] = "profile_picture = '" . $this->db->escapeString($userData['profile_picture']) . "'";
-        }
-        
-        if (isset($userData['phone_number'])) {
-            $sets[] = "phone_number = '" . $this->db->escapeString($userData['phone_number']) . "'";
-        }
-        
-        if (isset($userData['address'])) {
-            $sets[] = "address = '" . $this->db->escapeString($userData['address']) . "'";
-        }
-        
-        if (isset($userData['city'])) {
-            $sets[] = "city = '" . $this->db->escapeString($userData['city']) . "'";
-        }
-        
-        if (isset($userData['state'])) {
-            $sets[] = "state = '" . $this->db->escapeString($userData['state']) . "'";
-        }
-        
-        if (isset($userData['postal_code'])) {
-            $sets[] = "postal_code = '" . $this->db->escapeString($userData['postal_code']) . "'";
-        }
-        
-        if (isset($userData['country'])) {
-            $sets[] = "country = '" . $this->db->escapeString($userData['country']) . "'";
-        }
-        
-        if (isset($userData['is_active'])) {
-            $sets[] = "is_active = " . ($userData['is_active'] ? 'TRUE' : 'FALSE');
-        }
-        
-        if (isset($userData['google_id'])) {
-            $sets[] = "google_id = '" . $this->db->escapeString($userData['google_id']) . "'";
-        }
-        
-        if (isset($userData['password'])) {
-            $sets[] = "password = '" . $this->db->escapeString($userData['password']) . "'";
-        }
-        
-        if (empty($sets)) {
+        try {
+            if (empty($id) || empty($userData)) {
+                throw new Exception("Missing user ID or update data");
+            }
+
+            $updates = [];
+            $params = [];
+            
+            foreach ($userData as $field => $value) {
+                if ($value !== null) {
+                    $updates[] = "$field = ?";
+                    $params[] = $value;
+                }
+            }
+            
+            $params[] = $id;
+            
+            $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+            
+            if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                error_log("SQL Update: " . $sql);
+                error_log("Update params: " . json_encode($params));
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Failed to prepare SQL statement: " . $this->db->error);
+            }
+
+            $result = $stmt->execute($params);
+            
+            if (!$result) {
+                if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                    error_log("SQL Error: " . json_encode($stmt->errorInfo()));
+                }
+                throw new Exception("Failed to execute SQL statement: " . implode(", ", $stmt->errorInfo()));
+            }
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Error updating user: " . $e->getMessage());
+            if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                error_log("User ID: " . $id);
+                error_log("User data: " . json_encode($userData));
+                error_log("Error trace: " . $e->getTraceAsString());
+            }
             return false;
         }
-        
-        $query = "UPDATE users SET " . implode(', ', $sets) . ", updated_at = NOW() WHERE id = " . (int)$id;
-        $this->db->query($query);
-        
-        return $this->db->getAffectedRows() > 0;
     }
     
     /**
      * Get all users
      */
     public function getAll() {
-        $result = $this->db->query("SELECT * FROM users ORDER BY id DESC");
-        $users = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $users[] = $row;
+        try {
+            $stmt = $this->db->query("SELECT * FROM users ORDER BY created_at DESC");
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting all users: " . $e->getMessage());
+            return [];
         }
-        
-        return $users;
     }
     
     /**
      * Get users by role
      */
     public function getByRole($roleId) {
-        $roleId = (int)$roleId;
-        $result = $this->db->query("SELECT * FROM users WHERE role_id = {$roleId} ORDER BY id DESC");
-        $users = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $users[] = $row;
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE role_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$roleId]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting users by role: " . $e->getMessage());
+            return [];
         }
-        
-        return $users;
     }
     
     /**
-     * Delete a user
+     * Delete user
      */
     public function delete($id) {
-        $id = (int)$id;
-        $this->db->query("DELETE FROM users WHERE id = {$id}");
-        return $this->db->getAffectedRows() > 0;
+        try {
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            error_log("Error deleting user: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**
-     * Store remember me token
+     * Store remember token
      */
     public function storeRememberToken($userId, $token, $expiry) {
-        $userId = (int)$userId;
-        $token = $this->db->escapeString($token);
-        $expiry = date('Y-m-d H:i:s', $expiry);
-        
-        // Remove any existing tokens for this user
-        $this->removeRememberToken($userId);
-        
-        // Store new token
-        $query = "INSERT INTO user_tokens (user_id, token, expiry, created_at) 
-                 VALUES ({$userId}, '{$token}', '{$expiry}', NOW())";
-        
-        return $this->db->query($query);
+        try {
+            // First remove any existing tokens for this user
+            $this->removeRememberToken($userId);
+            
+            $stmt = $this->db->prepare("INSERT INTO user_tokens (user_id, token, expiry) VALUES (?, ?, ?)");
+            return $stmt->execute([$userId, $token, $expiry]);
+        } catch (PDOException $e) {
+            error_log("Error storing remember token: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**
-     * Remove remember me token
+     * Remove remember token
      */
     public function removeRememberToken($userId) {
-        $userId = (int)$userId;
-        $query = "DELETE FROM user_tokens WHERE user_id = {$userId}";
-        
-        return $this->db->query($query);
+        try {
+            $stmt = $this->db->prepare("DELETE FROM user_tokens WHERE user_id = ?");
+            return $stmt->execute([$userId]);
+        } catch (PDOException $e) {
+            error_log("Error removing remember token: " . $e->getMessage());
+            return false;
+        }
     }
     
     /**
      * Get user by remember token
      */
     public function getUserByRememberToken($token) {
-        $token = $this->db->escapeString($token);
-        $now = date('Y-m-d H:i:s');
-        
-        $query = "SELECT u.* FROM users u 
-                 JOIN user_tokens t ON u.id = t.user_id 
-                 WHERE t.token = '{$token}' AND t.expiry > '{$now}' 
-                 LIMIT 1";
-        
-        $result = $this->db->query($query);
-        
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare("
+                SELECT u.* 
+                FROM users u 
+                JOIN user_tokens t ON u.id = t.user_id 
+                WHERE t.token = ? AND t.expiry > NOW()
+                LIMIT 1
+            ");
+            $stmt->execute([$token]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Error getting user by remember token: " . $e->getMessage());
+            return false;
         }
-        
-        return null;
     }
     
     /**
      * Clean expired tokens
      */
     public function cleanExpiredTokens() {
-        $now = date('Y-m-d H:i:s');
-        $query = "DELETE FROM user_tokens WHERE expiry <= '{$now}'";
-        
-        return $this->db->query($query);
+        try {
+            $stmt = $this->db->prepare("DELETE FROM user_tokens WHERE expiry <= NOW()");
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error cleaning expired tokens: " . $e->getMessage());
+            return false;
+        }
     }
 } 

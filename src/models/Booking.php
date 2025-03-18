@@ -1,14 +1,10 @@
 <?php
-
-namespace App\Models;
-
-use App\Database\Database;
-use PDO;
-
 /**
  * Booking Model
  * Handles database operations for bookings
  */
+require_once SRC_PATH . '/database/Database.php';
+
 class Booking {
     private $db;
     private $table = 'bookings';
@@ -17,7 +13,7 @@ class Booking {
      * Constructor
      */
     public function __construct() {
-        $this->db = Database::getInstance();
+        $this->db = Database::getInstance()->getConnection();
     }
 
     /**
@@ -372,6 +368,101 @@ class Booking {
             // Log error
             error_log("Error updating payment status: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Get upcoming bookings for a user
+     * 
+     * @param int $userId User ID
+     * @param int $limit Limit number of results
+     * @return array Array of upcoming bookings
+     */
+    public function getUpcomingBookings($userId, $limit = 5) {
+        $sql = "SELECT b.*, 
+                s.name as service_name,
+                p.first_name as provider_first_name,
+                p.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN services s ON b.service_id = s.id
+                JOIN users p ON b.provider_id = p.id
+                WHERE b.client_id = :user_id
+                AND (b.booking_date > CURDATE() 
+                    OR (b.booking_date = CURDATE() AND b.start_time >= CURTIME()))
+                AND b.status != 'cancelled'
+                ORDER BY b.booking_date ASC, b.start_time ASC
+                LIMIT :limit";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting upcoming bookings: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get recent bookings for a user
+     * 
+     * @param int $userId User ID
+     * @param int $limit Limit number of results
+     * @return array Array of recent bookings
+     */
+    public function getRecentBookings($userId, $limit = 5) {
+        $sql = "SELECT b.*, 
+                s.name as service_name,
+                p.first_name as provider_first_name,
+                p.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN services s ON b.service_id = s.id
+                JOIN users p ON b.provider_id = p.id
+                WHERE b.client_id = :user_id
+                AND (b.booking_date < CURDATE() 
+                    OR (b.booking_date = CURDATE() AND b.start_time < CURTIME()))
+                ORDER BY b.booking_date DESC, b.start_time DESC
+                LIMIT :limit";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting recent bookings: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get all bookings for a user
+     * 
+     * @param int $userId User ID
+     * @return array Array of all bookings
+     */
+    public function getAllBookings($userId) {
+        $sql = "SELECT b.*, 
+                s.name as service_name,
+                p.first_name as provider_first_name,
+                p.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN services s ON b.service_id = s.id
+                JOIN users p ON b.provider_id = p.id
+                WHERE b.client_id = :user_id
+                ORDER BY b.booking_date DESC, b.start_time DESC";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting all bookings: " . $e->getMessage());
+            return [];
         }
     }
 } 

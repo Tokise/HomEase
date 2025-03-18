@@ -1,4 +1,4 @@
-<?php /* Header is already included by the Controller */ ?>
+<?php require_once SRC_PATH . '/views/layouts/header.php'; ?>
 
 <!-- Hero Section -->
 <section class="hero-section">
@@ -310,4 +310,4 @@
     });
 </script>
 
-<?php /* Footer is already included by the Controller */ ?> 
+<?php require_once SRC_PATH . '/views/layouts/footer.php'; ?> 

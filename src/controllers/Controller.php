@@ -21,41 +21,28 @@ if (!function_exists('extract')) {
 
 class Controller {
     /**
+     * Constructor
+     */
+    public function __construct() {
+        // Base constructor for common initialization
+    }
+
+    /**
      * Render a view
      * 
      * @param string $view The view file to render
      * @param array $data Data to pass to the view
      */
     protected function render($view, $data = []) {
-        // Extract data to variables
         extract($data);
         
-        // Check if view exists
         $viewPath = SRC_PATH . '/views/' . $view . '.php';
         if (!file_exists($viewPath)) {
             throw new Exception("View '{$view}' not found");
         }
         
-        // Start output buffering
         ob_start();
-        
-        // Check if we're rendering an error page
-        $isErrorPage = strpos($view, 'errors/') === 0;
-        
-        // Include header (except for error pages which will include it themselves)
-        if (!$isErrorPage) {
-            include SRC_PATH . '/views/layouts/header.php';
-        }
-        
-        // Include the view
         include $viewPath;
-        
-        // Include footer (except for error pages)
-        if (!$isErrorPage) {
-            include SRC_PATH . '/views/layouts/footer.php';
-        }
-        
-        // End buffering and output
         echo ob_get_clean();
     }
     

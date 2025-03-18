@@ -19,6 +19,34 @@ class HomeController extends Controller {
      * Landing page
      */
     public function index() {
+        // Check if user is authenticated and redirect to appropriate dashboard
+        if ($this->isAuthenticated()) {
+            $user = $this->getCurrentUser();
+            if (!$user) {
+                // If session exists but user not found, clear session
+                session_unset();
+                session_destroy();
+                session_start();
+                $this->redirect(APP_URL);
+                return;
+            }
+            
+            // Redirect based on role
+            switch ($user['role_id']) {
+                case ROLE_ADMIN:
+                    $this->redirect(APP_URL . '/admin/dashboard');
+                    break;
+                case ROLE_MANAGER:
+                    $this->redirect(APP_URL . '/manager/dashboard');
+                    break;
+                case ROLE_CLIENT:
+                default:
+                    $this->redirect(APP_URL . '/client/dashboard');
+                    break;
+            }
+            return;
+        }
+        
         // Make sure any debug routing information is cleared
         if (ob_get_length()) {
             ob_clean();

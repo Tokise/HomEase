@@ -1,0 +1,27 @@
+# Environment files
+.env
+.env.backup
+
+# Vendor directory
+/vendor/
+
+# IDE files
+.idea/
+.vscode/
+
+# Logs
+/logs/
+*.log
+
+# Cache files
+.php_cs.cache
+.phpunit.result.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 

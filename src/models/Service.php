@@ -2,98 +2,98 @@
 /**
  * Service Model
  */
+require_once SRC_PATH . '/database/Database.php';
+
 class Service {
     private $db;
+    private $table = 'services';
     
     public function __construct() {
-        require_once SRC_PATH . '/utils/Database.php';
-        $this->db = Database::getInstance();
+        $this->db = Database::getInstance()->getConnection();
     }
     
     /**
      * Get all services
      */
     public function getAll() {
-        $result = $this->db->query("
-            SELECT s.*, c.name as category_name 
-            FROM services s
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE s.is_active = TRUE
-            ORDER BY s.id DESC
-        ");
+        $sql = "SELECT s.*, c.name as category_name 
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE s.is_active = TRUE
+                ORDER BY s.id DESC";
         
-        $services = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $services[] = $row;
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting all services: " . $e->getMessage());
+            return [];
         }
-        
-        return $services;
     }
     
     /**
      * Get service by ID
      */
     public function findById($id) {
-        $id = $this->db->escapeString($id);
-        $result = $this->db->query("
-            SELECT s.*, c.name as category_name 
-            FROM services s
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE s.id = {$id} 
-            LIMIT 1
-        ");
+        $sql = "SELECT s.*, c.name as category_name 
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE s.id = :id 
+                LIMIT 1";
         
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error finding service: " . $e->getMessage());
+            return null;
         }
-        
-        return null;
     }
     
     /**
      * Get services by category ID
      */
     public function getByCategory($categoryId) {
-        $categoryId = (int)$categoryId;
-        $result = $this->db->query("
-            SELECT s.*, c.name as category_name 
-            FROM services s
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE s.category_id = {$categoryId} AND s.is_active = TRUE
-            ORDER BY s.name ASC
-        ");
+        $sql = "SELECT s.*, c.name as category_name 
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE s.category_id = :category_id AND s.is_active = TRUE
+                ORDER BY s.name ASC";
         
-        $services = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $services[] = $row;
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting services by category: " . $e->getMessage());
+            return [];
         }
-        
-        return $services;
     }
     
     /**
      * Get featured services
      */
     public function getFeatured($limit = 6) {
-        $limit = (int)$limit;
-        $result = $this->db->query("
-            SELECT s.*, c.name as category_name 
-            FROM services s
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE s.is_active = TRUE
-            ORDER BY RAND()
-            LIMIT {$limit}
-        ");
+        $sql = "SELECT s.*, c.name as category_name 
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE s.is_active = TRUE
+                ORDER BY RAND()
+                LIMIT :limit";
         
-        $services = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $services[] = $row;
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting featured services: " . $e->getMessage());
+            return [];
         }
-        
-        return $services;
     }
     
     /**
