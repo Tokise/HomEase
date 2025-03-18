@@ -7,7 +7,7 @@ class User {
     private $table = 'users';
     
     public function __construct() {
-        require_once SRC_PATH . '/database/Database.php';
+        require_once __DIR__ . '/../database/Database.php';
         $this->db = Database::getInstance()->getConnection();
         
         if (!$this->db) {
@@ -20,7 +20,7 @@ class User {
      */
     public function findById($id) {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+            $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = ?");
             $stmt->execute([$id]);
             return $stmt->fetch();
         } catch (PDOException $e) {
@@ -34,7 +34,7 @@ class User {
      */
     public function findByEmail($email) {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+            $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE email = ?");
             $stmt->execute([$email]);
             return $stmt->fetch();
         } catch (PDOException $e) {
@@ -48,7 +48,7 @@ class User {
      */
     public function findByGoogleId($googleId) {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM users WHERE google_id = ? LIMIT 1");
+            $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE google_id = ?");
             $stmt->execute([$googleId]);
             return $stmt->fetch();
         } catch (PDOException $e) {
@@ -58,61 +58,49 @@ class User {
     }
     
     /**
-     * Create new user
+     * Create a new user
      */
-    public function create($userData) {
+    public function create($data) {
         try {
-            if (empty($userData)) {
-                throw new Exception("No user data provided");
-            }
-
+            // Prepare fields and values
             $fields = [];
             $values = [];
-            $params = [];
+            $placeholders = [];
             
-            foreach ($userData as $field => $value) {
-                if ($value !== null) {
+            error_log("Creating user with data: " . print_r($data, true));
+            
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only include non-null values
                     $fields[] = $field;
-                    $values[] = '?';
-                    $params[] = $value;
+                    $values[] = $value;
+                    $placeholders[] = '?';
+                    
+                    if ($field === 'password') {
+                        error_log("Password hash length: " . strlen($value));
+                    }
                 }
             }
             
-            $sql = "INSERT INTO users (" . implode(', ', $fields) . ") 
-                    VALUES (" . implode(', ', $values) . ")";
+            $fieldsStr = implode(', ', $fields);
+            $placeholdersStr = implode(', ', $placeholders);
             
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("SQL Insert: " . $sql);
-                error_log("Insert params: " . json_encode($params));
-            }
+            $sql = "INSERT INTO {$this->table} ($fieldsStr) VALUES ($placeholdersStr)";
+            error_log("SQL: $sql");
             
             $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
-                throw new Exception("Failed to prepare SQL statement: " . $this->db->error);
-            }
-
-            $result = $stmt->execute($params);
+            $success = $stmt->execute($values);
             
-            if (!$result) {
-                if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                    error_log("SQL Error: " . json_encode($stmt->errorInfo()));
-                }
-                throw new Exception("Failed to execute SQL statement: " . implode(", ", $stmt->errorInfo()));
+            if ($success) {
+                $userId = $this->db->lastInsertId();
+                error_log("User created successfully with ID: $userId");
+                return $userId;
             }
             
-            $lastId = $this->db->lastInsertId();
-            
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("Last insert ID: " . $lastId);
-            }
-            
-            return $lastId;
+            error_log("Failed to create user. SQL Error: " . print_r($stmt->errorInfo(), true));
+            return false;
         } catch (PDOException $e) {
             error_log("Error creating user: " . $e->getMessage());
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("User data: " . json_encode($userData));
-                error_log("Error trace: " . $e->getTraceAsString());
-            }
+            error_log("Data: " . print_r($data, true));
             return false;
         }
     }
@@ -120,53 +108,53 @@ class User {
     /**
      * Update user
      */
-    public function update($id, $userData) {
+    public function update($id, $data) {
         try {
-            if (empty($id) || empty($userData)) {
-                throw new Exception("Missing user ID or update data");
-            }
-
-            $updates = [];
-            $params = [];
+            $sets = [];
+            $values = [];
             
-            foreach ($userData as $field => $value) {
-                if ($value !== null) {
-                    $updates[] = "$field = ?";
-                    $params[] = $value;
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only update non-null values
+                    $sets[] = "$field = ?";
+                    $values[] = $value;
                 }
             }
             
-            $params[] = $id;
+            $values[] = $id;  // Add ID for WHERE clause
+            $setsStr = implode(', ', $sets);
             
-            $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
-            
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("SQL Update: " . $sql);
-                error_log("Update params: " . json_encode($params));
-            }
+            $sql = "UPDATE {$this->table} SET $setsStr WHERE id = ?";
             
             $stmt = $this->db->prepare($sql);
-            if (!$stmt) {
-                throw new Exception("Failed to prepare SQL statement: " . $this->db->error);
-            }
-
-            $result = $stmt->execute($params);
-            
-            if (!$result) {
-                if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                    error_log("SQL Error: " . json_encode($stmt->errorInfo()));
-                }
-                throw new Exception("Failed to execute SQL statement: " . implode(", ", $stmt->errorInfo()));
-            }
-            
-            return $result;
+            return $stmt->execute($values);
         } catch (PDOException $e) {
             error_log("Error updating user: " . $e->getMessage());
-            if (defined('DEBUG_MODE') && DEBUG_MODE) {
-                error_log("User ID: " . $id);
-                error_log("User data: " . json_encode($userData));
-                error_log("Error trace: " . $e->getTraceAsString());
+            error_log("Data: " . print_r($data, true));
+            return false;
+        }
+    }
+    
+    /**
+     * Update Google information for user
+     */
+    public function updateGoogleInfo($id, $googleId, $googleData) {
+        try {
+            // Log the update operation for debugging
+            if (DEBUG_MODE) {
+                error_log("Updating Google info for user $id with Google ID $googleId");
+                error_log("Google data: " . print_r($googleData, true));
             }
+            
+            $stmt = $this->db->prepare("
+                UPDATE {$this->table} 
+                SET google_id = ?, 
+                    google_picture = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ");
+            return $stmt->execute([$googleId, $googleData['picture'] ?? null, $id]);
+        } catch (PDOException $e) {
+            error_log("Error updating Google info: " . $e->getMessage());
             return false;
         }
     }
@@ -270,6 +258,21 @@ class User {
         } catch (PDOException $e) {
             error_log("Error cleaning expired tokens: " . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Get recent users
+     */
+    public function getRecent($limit = 5) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM users ORDER BY created_at DESC LIMIT ?");
+            $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting recent users: " . $e->getMessage());
+            return [];
         }
     }
 } 

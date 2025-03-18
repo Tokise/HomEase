@@ -3,34 +3,31 @@
     RewriteEngine On
     RewriteBase /HomEase/
 
-    # If the request is for an existing file or directory, serve it directly
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # If the request starts with /public and the file/directory exists, serve it directly
+    # If the request is for an existing file or directory in public, serve it directly
     RewriteCond %{REQUEST_URI} ^/HomEase/public/
     RewriteCond %{DOCUMENT_ROOT}/HomEase%{REQUEST_URI} -f [OR]
     RewriteCond %{DOCUMENT_ROOT}/HomEase%{REQUEST_URI} -d
     RewriteRule ^ - [L]
 
-    # If the request is for the root URL, remove index.php if present
-    RewriteRule ^index\.php$ - [L]
-    
-    # Handle Google handler directly
-    RewriteCond %{REQUEST_URI} ^/auth/google-handler$
+    # If the request is for an existing file or directory in root, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
+
+    # Handle Google handler directly
     RewriteRule ^auth/google-handler$ public/auth/google-handler.php [QSA,L]
 
-    # Handle all other routes through index.php
+    # Handle all other requests through index.php
+    RewriteRule ^$ public/index.php [L]
     RewriteRule ^(.*)$ public/index.php [QSA,L]
 </IfModule>
 
 # Set default character set
-<IfModule mod_mime.c>
-    AddType application/x-httpd-php .php
-    AddDefaultCharset UTF-8
-</IfModule>
+AddDefaultCharset UTF-8
 
 # Enable PHP error displaying for development
 php_flag display_errors On

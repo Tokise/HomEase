@@ -129,4 +129,72 @@ class Controller {
             $this->redirect(APP_URL . '/error/forbidden');
         }
     }
+    
+    /**
+     * Get role name from role ID
+     */
+    public function getRoleName($roleId) {
+        switch ($roleId) {
+            case ROLE_ADMIN:
+                return 'Administrator';
+            case ROLE_SERVICE_PROVIDER:
+                return 'Service Provider';
+            case ROLE_CLIENT:
+                return 'Client';
+            default:
+                return 'Unknown';
+        }
+    }
+    
+    /**
+     * Get role badge class for Bootstrap styling
+     */
+    public function getRoleBadgeClass($roleId) {
+        switch ($roleId) {
+            case ROLE_ADMIN:
+                return 'danger';
+            case ROLE_SERVICE_PROVIDER:
+                return 'success';
+            case ROLE_CLIENT:
+                return 'primary';
+            default:
+                return 'secondary';
+        }
+    }
+    
+    /**
+     * Get booking status badge class for Bootstrap styling
+     */
+    public function getStatusBadgeClass($status) {
+        switch ($status) {
+            case 'pending':
+                return 'warning';
+            case 'confirmed':
+                return 'primary';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
+    }
+    
+    /**
+     * Get booking status badge class for client view
+     */
+    public function getBookingStatusClass($status) {
+        switch ($status) {
+            case 'pending':
+                return 'warning';
+            case 'confirmed':
+                return 'primary';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
+    }
 } 

@@ -22,8 +22,38 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle text-dark" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-2"></i>
-                        <?= htmlspecialchars($user['first_name']) ?>
+                        <div class="profile-avatar-wrapper">
+                            <?php if (!empty($user['google_picture'])): ?>
+                                <img src="<?= htmlspecialchars($user['google_picture']) ?>" alt="Profile" class="user-avatar">
+                            <?php elseif (!empty($user['profile_picture'])): ?>
+                                <img src="<?= APP_URL ?>/<?= $user['profile_picture'] ?>" alt="Profile" class="user-avatar">
+                            <?php else: ?>
+                                <div class="default-avatar" style="background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%); color: white;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($user['google_id'])): ?>
+                                <span style="
+                                    position: absolute;
+                                    bottom: -2px;
+                                    right: -2px;
+                                    background: #fff;
+                                    border-radius: 50%;
+                                    width: 16px;
+                                    height: 16px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 10px;
+                                    color: #4285F4;
+                                    border: 1px solid #e0e0e0;
+                                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);"
+                                    title="Google Account">
+                                    <i class="fab fa-google"></i>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <span class="ms-2"><?= htmlspecialchars($user['first_name']) ?></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                         <li><a class="dropdown-item" href="<?= APP_URL ?>/client/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
@@ -41,18 +71,47 @@
             <div class="col-md-4">
                 <div class="card profile-card">
                     <div class="card-body text-center">
-                        <div class="profile-image mb-3">
-                            <?php if (!empty($user['profile_picture'])): ?>
-                                <img src="<?= APP_URL ?>/<?= $user['profile_picture'] ?>" alt="Profile Picture" class="rounded-circle">
-                            <?php else: ?>
-                                <div class="default-avatar">
-                                    <i class="fas fa-user"></i>
+                        <div class="profile-image-container mb-4">
+                            <div class="profile-image">
+                                <?php if (!empty($user['google_picture'])): ?>
+                                    <img src="<?= htmlspecialchars($user['google_picture']) ?>" alt="Profile Picture" class="rounded-circle">
+                                <?php elseif (!empty($user['profile_picture'])): ?>
+                                    <img src="<?= APP_URL ?>/<?= $user['profile_picture'] ?>" alt="Profile Picture" class="rounded-circle">
+                                <?php else: ?>
+                                    <div class="default-avatar" style="background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%); color: white;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if (!empty($user['google_id'])): ?>
+                                <div style="
+                                    position: absolute;
+                                    bottom: 5px;
+                                    right: 5px;
+                                    background: #fff;
+                                    border-radius: 50%;
+                                    width: 32px;
+                                    height: 32px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 18px;
+                                    color: #4285F4;
+                                    border: 2px solid #fff;
+                                    box-shadow: 0 3px 8px rgba(0,0,0,0.15);"
+                                    title="Google Account">
+                                    <i class="fab fa-google"></i>
                                 </div>
                             <?php endif; ?>
                         </div>
                         <h4 class="mb-1"><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h4>
                         <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
                         <p class="text-muted"><i class="fas fa-phone me-2"></i><?= htmlspecialchars($user['phone_number'] ?? 'Not provided') ?></p>
+                        <?php if (!empty($user['google_id'])): ?>
+                            <span class="account-type-badge">
+                                <i class="fab fa-google me-1"></i> Google Account
+                            </span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -115,6 +174,7 @@
 <style>
 :root {
     --primary-color: #4e73df;
+    --primary-hover: #2e59d9;
     --text-primary: #333;
     --text-secondary: #6c757d;
     --bg-light: #f8f9fc;
@@ -138,9 +198,63 @@ body {
     width: auto;
 }
 
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.user-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover, #2e59d9) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.google-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #fff;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #4285F4;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
 .dropdown-toggle {
     font-weight: 500;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.dropdown-toggle:hover {
+    background-color: rgba(0,0,0,0.05);
 }
 
 .dropdown-menu {
@@ -183,31 +297,79 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.profile-image-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+}
+
 .profile-image {
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     margin: 0 auto;
     position: relative;
+    border-radius: 50%;
+    padding: 4px;
+    background-color: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 .profile-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 50%;
     border: 3px solid #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .default-avatar {
     width: 100%;
     height: 100%;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 3rem;
+    font-size: 3.5rem;
+    border: 3px solid #fff;
+}
+
+.profile-google-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #4285F4;
+    border: 2px solid #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.account-type-badge {
+    display: inline-block;
+    padding: 6px 15px;
+    background-color: #f8f9fc;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4285F4;
+    margin-top: 10px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.account-type-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .form-label {

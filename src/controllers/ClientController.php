@@ -54,7 +54,7 @@ class ClientController extends Controller {
      */
     public function profile() {
         // Check if user is logged in and is a client
-        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] !== 'client') {
+        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] != ROLE_CLIENT) {
             $_SESSION['flash_message'] = 'You must be logged in as a client to access this page';
             $_SESSION['flash_type'] = 'danger';
             $this->redirect(APP_URL . '/auth/login');
@@ -85,7 +85,7 @@ class ClientController extends Controller {
      */
     public function updateProfile() {
         // Check if user is logged in and is a client
-        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] !== 'client') {
+        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] != ROLE_CLIENT) {
             $_SESSION['flash_message'] = 'You must be logged in as a client to access this page';
             $_SESSION['flash_type'] = 'danger';
             $this->redirect(APP_URL . '/auth/login');
@@ -144,7 +144,7 @@ class ClientController extends Controller {
      */
     public function bookings() {
         // Check if user is logged in and is a client
-        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] !== 'client') {
+        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] != ROLE_CLIENT) {
             $_SESSION['flash_message'] = 'You must be logged in as a client to access this page';
             $_SESSION['flash_type'] = 'danger';
             $this->redirect(APP_URL . '/auth/login');

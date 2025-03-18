@@ -58,7 +58,7 @@
                 data-client_id="<?= GOOGLE_CLIENT_ID ?>"
                 data-context="signin"
                 data-ux_mode="popup"
-                data-login_uri="<?= APP_URL ?>/auth/google-handler"
+                data-callback="handleCredentialResponse"
                 data-auto_prompt="false">
             </div>
             <div class="g_id_signin"
@@ -156,10 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Handle Google Sign-In
 function handleCredentialResponse(response) {
-    if (DEBUG_MODE) {
-        console.log('Google Sign-In Response:', response);
-    }
-
     fetch('<?= APP_URL ?>/auth/google-handler', {
         method: 'POST',
         headers: {
@@ -174,16 +170,10 @@ function handleCredentialResponse(response) {
         }
         return response.json();
     })
-    .then(async data => {
-        if (data.status === 'success') {
-            await Swal.fire({
-                icon: 'success',
-                title: 'Welcome!',
-                text: data.message || 'Successfully signed in with Google',
-                showConfirmButton: false,
-                timer: 1500
-            });
-            window.location.href = data.redirect || '<?= APP_URL ?>/client/dashboard';
+    .then(data => {
+        if (data.success) {
+            // Redirect directly without showing message
+            window.location.href = data.redirect;
         } else {
             throw new Error(data.message || 'Failed to sign in with Google');
         }

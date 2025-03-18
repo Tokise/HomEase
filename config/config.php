@@ -45,23 +45,28 @@ function env($key, $default = null) {
     return $value;
 }
 
-// Database Configuration
-define('DB_HOST', env('DB_HOST', 'localhost'));
-define('DB_NAME', env('DB_NAME', 'homeasedb'));
-define('DB_USER', env('DB_USER', 'root'));
-define('DB_PASS', env('DB_PASS', ''));
-
-// Google API Configuration
-define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID'));
-define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET'));
-
-// Google Maps API Configuration
-define('GOOGLE_MAPS_API_KEY', env('GOOGLE_MAPS_API_KEY'));
-
-// Application Settings
+// Application Constants
 define('APP_NAME', env('APP_NAME', 'HomEase'));
 define('APP_URL', env('APP_URL', 'http://localhost/HomEase'));
+define('APP_ENV', env('APP_ENV', 'development'));
 define('DEBUG_MODE', env('APP_DEBUG', 'true') === 'true');
+
+// Role Constants
+define('ROLE_ADMIN', 1);
+define('ROLE_SERVICE_PROVIDER', 2);
+define('ROLE_CLIENT', 3);
+
+// Google Configuration
+define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID'));
+define('GOOGLE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET'));
+define('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URI'));
+define('GOOGLE_MAPS_API_KEY', env('GOOGLE_API_KEY'));
+
+// Database Configuration
+define('DB_HOST', env('DB_HOST', 'localhost'));
+define('DB_NAME', env('DB_NAME', 'homease'));
+define('DB_USER', env('DB_USER', 'root'));
+define('DB_PASS', env('DB_PASS', ''));
 
 // Session Configuration
 define('SESSION_LIFETIME', 86400); // 24 hours in seconds
@@ -74,11 +79,6 @@ define('MAIL_PASSWORD', env('MAIL_PASSWORD'));
 define('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls'));
 define('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS'));
 define('MAIL_FROM_NAME', env('MAIL_FROM_NAME', 'HomEase Support'));
-
-// User Roles
-define('ROLE_ADMIN', 1);
-define('ROLE_MANAGER', 2);
-define('ROLE_CLIENT', 3);
 
 // Error Handling
 if (DEBUG_MODE) {

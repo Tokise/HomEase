@@ -57,6 +57,17 @@ class AuthController extends Controller {
         try {
             $user = $this->userModel->findByEmail($email);
             
+            // Add additional debugging for password verification
+            if ($user) {
+                error_log("Found user with email: $email (ID: {$user['id']})");
+                error_log("Stored password hash: " . $user['password']);
+                error_log("Password hash length: " . strlen($user['password']));
+                $verified = password_verify($password, $user['password']);
+                error_log("Password verification result: " . ($verified ? 'SUCCESS' : 'FAILED'));
+            } else {
+                error_log("No user found with email: $email");
+            }
+            
             if (!$user || !password_verify($password, $user['password'])) {
                 if (DEBUG_MODE) {
                     error_log("Login failed for email: $email");
@@ -72,7 +83,7 @@ class AuthController extends Controller {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $this->getRoleName($user['role_id']);
+            $_SESSION['user_role'] = $user['role_id']; // Store numeric role
             $_SESSION['auth_type'] = 'manual';
             
             // Set remember me cookie if requested
@@ -130,6 +141,8 @@ class AuthController extends Controller {
      * Process registration form submission
      */
     public function processRegister() {
+        header('Content-Type: application/json');
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->renderJson([
                 'success' => false,
@@ -142,7 +155,7 @@ class AuthController extends Controller {
         $firstName = trim($_POST['first_name'] ?? '');
         $lastName = trim($_POST['last_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
+        $phone = trim($_POST['phone_number'] ?? '');
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
         
@@ -202,7 +215,9 @@ class AuthController extends Controller {
             'email' => $email,
             'phone_number' => $phone,
             'password' => $hashedPassword,
-            'role_id' => ROLE_CLIENT // Default role for new users
+            'role_id' => ROLE_CLIENT, // Default role for new users
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
         ];
         
         // Create user and get ID
@@ -221,7 +236,7 @@ class AuthController extends Controller {
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_name'] = $firstName . ' ' . $lastName;
             $_SESSION['user_email'] = $email;
-            $_SESSION['user_role'] = 'client'; // Default role
+            $_SESSION['user_role'] = ROLE_CLIENT; // Use numeric role ID constant
             $_SESSION['auth_type'] = 'manual';
             
             $this->renderJson([
@@ -270,13 +285,13 @@ class AuthController extends Controller {
     public function getRoleName($roleId) {
         switch ($roleId) {
             case ROLE_ADMIN:
-                return 'admin';
-            case ROLE_MANAGER:
-                return 'manager';
+                return 'Administrator';
+            case ROLE_SERVICE_PROVIDER:
+                return 'Service Provider';
             case ROLE_CLIENT:
-                return 'client';
+                return 'Client';
             default:
-                return 'unknown';
+                return 'Unknown';
         }
     }
     
@@ -287,8 +302,8 @@ class AuthController extends Controller {
         switch ($roleId) {
             case ROLE_ADMIN:
                 return APP_URL . '/admin/dashboard';
-            case ROLE_MANAGER:
-                return APP_URL . '/manager/dashboard';
+            case ROLE_SERVICE_PROVIDER:
+                return APP_URL . '/provider/dashboard';
             case ROLE_CLIENT:
             default:
                 return APP_URL . '/client/dashboard';

@@ -11,50 +11,79 @@ class HomeController extends Controller {
     private $categoryModel;
     
     public function __construct() {
-        $this->serviceModel = new Service();
-        $this->categoryModel = new ServiceCategory();
+        try {
+            $this->serviceModel = new Service();
+            $this->categoryModel = new ServiceCategory();
+        } catch (Exception $e) {
+            // Log error but don't stop execution
+            error_log("Error initializing models: " . $e->getMessage());
+        }
     }
     
     /**
      * Landing page
      */
     public function index() {
-        // Check if user is authenticated and redirect to appropriate dashboard
-        if ($this->isAuthenticated()) {
-            $user = $this->getCurrentUser();
-            if (!$user) {
-                // If session exists but user not found, clear session
-                session_unset();
-                session_destroy();
-                session_start();
-                $this->redirect(APP_URL);
+        try {
+            // Check if user is authenticated and redirect to appropriate dashboard
+            if ($this->isAuthenticated()) {
+                $user = $this->getCurrentUser();
+                if (!$user) {
+                    // If session exists but user not found, clear session
+                    session_unset();
+                    session_destroy();
+                    session_start();
+                    $this->redirect(APP_URL);
+                    return;
+                }
+                
+                // Redirect based on role
+                switch ($user['role_id']) {
+                    case ROLE_ADMIN:
+                        $this->redirect(APP_URL . '/admin/dashboard');
+                        break;
+                    case ROLE_SERVICE_PROVIDER:
+                        $this->redirect(APP_URL . '/provider/dashboard');
+                        break;
+                    case ROLE_CLIENT:
+                    default:
+                        $this->redirect(APP_URL . '/client/dashboard');
+                        break;
+                }
                 return;
             }
             
-            // Redirect based on role
-            switch ($user['role_id']) {
-                case ROLE_ADMIN:
-                    $this->redirect(APP_URL . '/admin/dashboard');
-                    break;
-                case ROLE_MANAGER:
-                    $this->redirect(APP_URL . '/manager/dashboard');
-                    break;
-                case ROLE_CLIENT:
-                default:
-                    $this->redirect(APP_URL . '/client/dashboard');
-                    break;
+            // Make sure any debug routing information is cleared
+            if (ob_get_length()) {
+                ob_clean();
             }
-            return;
+
+            // Get featured services and categories if available
+            $featuredServices = [];
+            $categories = [];
+            
+            try {
+                if ($this->serviceModel && $this->categoryModel) {
+                    $featuredServices = $this->serviceModel->getFeatured(6);
+                    $categories = $this->categoryModel->getAll();
+                }
+            } catch (Exception $e) {
+                error_log("Error fetching services/categories: " . $e->getMessage());
+            }
+            
+            $this->render('home/landing', [
+                'title' => 'Home Services Made Easy - HomEase',
+                'featuredServices' => $featuredServices,
+                'categories' => $categories
+            ]);
+            
+        } catch (Exception $e) {
+            error_log("Error in HomeController::index: " . $e->getMessage());
+            $this->render('home/landing', [
+                'title' => 'Home Services Made Easy - HomEase',
+                'error' => 'An error occurred while loading the page.'
+            ]);
         }
-        
-        // Make sure any debug routing information is cleared
-        if (ob_get_length()) {
-            ob_clean();
-        }
-        
-        $this->render('home/landing', [
-            'title' => 'Home Services Made Easy - HomEase'
-        ]);
     }
     
     /**

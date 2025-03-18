@@ -23,9 +23,39 @@
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle text-dark" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-2"></i>
-                        <?= htmlspecialchars($user['first_name']) ?>
-                            </button>
+                        <div class="profile-avatar-wrapper">
+                            <?php if (!empty($user['google_picture'])): ?>
+                                <img src="<?= htmlspecialchars($user['google_picture']) ?>" alt="Profile" class="user-avatar">
+                            <?php elseif (!empty($user['profile_picture'])): ?>
+                                <img src="<?= APP_URL ?>/<?= $user['profile_picture'] ?>" alt="Profile" class="user-avatar">
+                            <?php else: ?>
+                                <div class="user-avatar-placeholder" style="background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);">
+                                    <i class="fas fa-user" style="font-size: 18px; color: white;"></i>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($user['google_id'])): ?>
+                                <span style="
+                                    position: absolute;
+                                    bottom: -2px;
+                                    right: -2px;
+                                    background: #fff;
+                                    border-radius: 50%;
+                                    width: 16px;
+                                    height: 16px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 10px;
+                                    color: #4285F4;
+                                    border: 1px solid #e0e0e0;
+                                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);"
+                                    title="Google Account">
+                                    <i class="fab fa-google"></i>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <span class="ms-2"><?= htmlspecialchars($user['first_name']) ?></span>
+                    </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                         <li><a class="dropdown-item" href="<?= APP_URL ?>/client/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
                         <li><a class="dropdown-item" href="<?= APP_URL ?>/client/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
@@ -182,6 +212,7 @@
     --warning-color: #f6c23e;
     --danger-color: #e74a3b;
     --light-color: #f8f9fc;
+    --bg-light: #f8f9fc;
     --dark-color: #5a5c69;
     --border-color: #e3e6f0;
     --shadow-color: rgba(58, 59, 69, 0.15);
@@ -528,6 +559,15 @@ body {
 .dropdown-toggle {
     font-weight: 500;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.dropdown-toggle:hover {
+    background-color: rgba(0,0,0,0.05);
 }
 
 .dropdown-menu {
@@ -567,7 +607,14 @@ body {
     color: var(--dark-color);
 }
 
-
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
 /* Responsive Header Styles */
 @media (max-width: 991px) {
@@ -597,6 +644,51 @@ body {
         border: 1px solid var(--border-color);
     }
     }
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.user-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover, #2e59d9) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.google-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #fff;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #4285F4;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 </style>
 
 <!-- Bootstrap JS and Popper.js -->

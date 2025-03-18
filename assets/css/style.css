@@ -118,6 +118,10 @@ button {
     position: relative;
 }
 
+.navbar-nav {
+    margin-left: 300px;
+}
+
 .nav-link:hover,
 .nav-link.active {
     color: var(--color-primary);

@@ -1,35 +1,38 @@
 -- HomEase Database Schema
 
 -- Drop database if exists (for fresh installation)
-DROP DATABASE IF EXISTS homeasedb;
+DROP DATABASE IF EXISTS homease;
 
 -- Create database
-CREATE DATABASE homeasedb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE homease CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Use database
-USE homeasedb;
+USE homease;
 
 -- Users table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    google_id VARCHAR(255) UNIQUE,
+    google_id VARCHAR(255) NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255),
+    password VARCHAR(255) NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    profile_picture VARCHAR(255),
-    phone_number VARCHAR(20),
+    profile_picture VARCHAR(255) NULL, -- Stores user uploaded profile pictures
+    google_picture VARCHAR(255) NULL, -- Stores Google account profile pictures
+    phone_number VARCHAR(20) NULL,
     role_id TINYINT NOT NULL DEFAULT 3, -- Default to client role
     email_verified BOOLEAN DEFAULT FALSE,
-    address VARCHAR(255),
-    city VARCHAR(100),
-    state VARCHAR(100),
-    postal_code VARCHAR(20),
-    country VARCHAR(100),
+    address VARCHAR(255) NULL,
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    postal_code VARCHAR(20) NULL,
+    country VARCHAR(100) NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_google_id (google_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- User Tokens table for Remember Me functionality
 CREATE TABLE user_tokens (
@@ -41,7 +44,7 @@ CREATE TABLE user_tokens (
     UNIQUE KEY token (token),
     KEY user_id (user_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Service Categories
 CREATE TABLE service_categories (
@@ -52,7 +55,7 @@ CREATE TABLE service_categories (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Services
 CREATE TABLE services (
@@ -67,7 +70,7 @@ CREATE TABLE services (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES service_categories(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Service Providers (connecting managers to services they can provide)
 CREATE TABLE service_providers (
@@ -150,8 +153,8 @@ CREATE TABLE messages (
 
 -- Insert default data
 -- Admin user
-INSERT INTO users (email, first_name, last_name, role_id, is_active)
-VALUES ('admin@homeease.com', 'Admin', 'User', 1, TRUE);
+INSERT INTO users (email, first_name, last_name, role_id, is_active, email_verified)
+VALUES ('admin@homeease.com', 'Admin', 'User', 1, TRUE, TRUE);
 
 -- Sample service categories
 INSERT INTO service_categories (name, description, icon) VALUES

@@ -14,147 +14,307 @@ class Booking {
      */
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
+        
+        if (!$this->db) {
+            throw new Exception("Failed to connect to database");
+        }
     }
 
     /**
-     * Create a new booking
-     * 
-     * @param array $data Booking data
-     * @return int|bool The ID of the created booking or false on failure
+     * Get all bookings
+     */
+    public function getAll() {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       s.price as service_price,
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       u.email as client_email,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name,
+                       pu.email as provider_email
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                ORDER BY b.booking_date DESC, b.start_time DESC
+            ";
+            
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting all bookings: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get booking by ID
+     */
+    public function findById($id) {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       s.price as service_price,
+                       s.description as service_description,
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       u.email as client_email,
+                       u.phone_number as client_phone,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name,
+                       pu.email as provider_email,
+                       pu.phone_number as provider_phone
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                WHERE b.id = ?
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Error finding booking by ID: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get bookings by client ID
+     */
+    public function getByClientId($clientId) {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       s.price as service_price,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name,
+                       pu.email as provider_email
+                FROM {$this->table} b
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                WHERE b.client_id = ?
+                ORDER BY b.booking_date DESC, b.start_time DESC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$clientId]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting bookings by client ID: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get bookings by provider ID
+     */
+    public function getByProviderId($providerId) {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       s.price as service_price,
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       u.email as client_email,
+                       u.phone_number as client_phone
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                WHERE b.provider_id = ?
+                ORDER BY b.booking_date DESC, b.start_time DESC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$providerId]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting bookings by provider ID: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Create booking
      */
     public function create($data) {
-        $sql = "INSERT INTO {$this->table} (
-                    client_id, 
-                    service_id, 
-                    provider_id, 
-                    booking_date, 
-                    start_time, 
-                    end_time, 
-                    status, 
-                    total_amount, 
-                    payment_status, 
-                    notes, 
-                    created_at
-                ) VALUES (
-                    :client_id, 
-                    :service_id, 
-                    :provider_id, 
-                    :booking_date, 
-                    :start_time, 
-                    :end_time, 
-                    :status, 
-                    :total_amount, 
-                    :payment_status, 
-                    :notes, 
-                    NOW()
-                )";
-        
         try {
+            // Prepare fields and values
+            $fields = [];
+            $values = [];
+            $placeholders = [];
+            
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only include non-null values
+                    $fields[] = $field;
+                    $values[] = $value;
+                    $placeholders[] = '?';
+                }
+            }
+            
+            $fieldsStr = implode(', ', $fields);
+            $placeholdersStr = implode(', ', $placeholders);
+            
+            $sql = "INSERT INTO {$this->table} ($fieldsStr) VALUES ($placeholdersStr)";
+            
             $stmt = $this->db->prepare($sql);
+            $success = $stmt->execute($values);
             
-            $stmt->bindValue(':client_id', $data['client_id'], PDO::PARAM_INT);
-            $stmt->bindValue(':service_id', $data['service_id'], PDO::PARAM_INT);
-            $stmt->bindValue(':provider_id', $data['provider_id'], PDO::PARAM_INT);
-            $stmt->bindValue(':booking_date', $data['booking_date']);
-            $stmt->bindValue(':start_time', $data['start_time']);
-            $stmt->bindValue(':end_time', $data['end_time']);
-            $stmt->bindValue(':status', $data['status'] ?? 'pending');
-            $stmt->bindValue(':total_amount', $data['total_amount'], PDO::PARAM_STR);
-            $stmt->bindValue(':payment_status', $data['payment_status'] ?? 'unpaid');
-            $stmt->bindValue(':notes', $data['notes'] ?? null);
-            
-            $stmt->execute();
-            return $this->db->lastInsertId();
-        } catch (\PDOException $e) {
-            // Log error
+            if ($success) {
+                return $this->db->lastInsertId();
+            }
+            return false;
+        } catch (PDOException $e) {
             error_log("Error creating booking: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Update a booking
-     * 
-     * @param int $id Booking ID
-     * @param array $data Booking data
-     * @return bool Success or failure
+     * Update booking
      */
     public function update($id, $data) {
-        $setClause = [];
-        $params = [':id' => $id];
-        
-        // Build set clause dynamically based on provided data
-        foreach ($data as $key => $value) {
-            $setClause[] = "{$key} = :{$key}";
-            $params[":{$key}"] = $value;
-        }
-        
-        $setClauseStr = implode(', ', $setClause);
-        
-        $sql = "UPDATE {$this->table} SET {$setClauseStr}, updated_at = NOW() WHERE id = :id";
-        
         try {
+            $sets = [];
+            $values = [];
+            
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only update non-null values
+                    $sets[] = "$field = ?";
+                    $values[] = $value;
+                }
+            }
+            
+            $values[] = $id;  // Add ID for WHERE clause
+            $setsStr = implode(', ', $sets);
+            
+            $sql = "UPDATE {$this->table} SET $setsStr WHERE id = ?";
+            
             $stmt = $this->db->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->rowCount() > 0;
-        } catch (\PDOException $e) {
-            // Log error
+            return $stmt->execute($values);
+        } catch (PDOException $e) {
             error_log("Error updating booking: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Delete a booking
-     * 
-     * @param int $id Booking ID
-     * @return bool Success or failure
+     * Delete booking
      */
     public function delete($id) {
-        $sql = "DELETE FROM {$this->table} WHERE id = :id";
-        
         try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->rowCount() > 0;
-        } catch (\PDOException $e) {
-            // Log error
+            $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
             error_log("Error deleting booking: " . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Find a booking by ID
-     * 
-     * @param int $id Booking ID
-     * @return array|bool Booking data or false if not found
+     * Get recent bookings
      */
-    public function findById($id) {
-        $sql = "SELECT b.*, 
-                s.name as service_name, 
-                u.first_name as client_first_name,
-                u.last_name as client_last_name,
-                p.first_name as provider_first_name,
-                p.last_name as provider_last_name
-                FROM {$this->table} b
-                JOIN services s ON b.service_id = s.id
-                JOIN users u ON b.client_id = u.id
-                JOIN users p ON b.provider_id = p.id
-                WHERE b.id = :id";
-        
+    public function getRecent($limit = 5) {
         try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                ORDER BY b.created_at DESC
+                LIMIT ?
+            ";
             
-            $booking = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $booking ?: false;
-        } catch (\PDOException $e) {
-            // Log error
-            error_log("Error finding booking: " . $e->getMessage());
-            return false;
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting recent bookings: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get bookings by date range
+     */
+    public function getByDateRange($startDate, $endDate) {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                WHERE b.booking_date BETWEEN ? AND ?
+                ORDER BY b.booking_date ASC, b.start_time ASC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$startDate, $endDate]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting bookings by date range: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get bookings by status
+     */
+    public function getByStatus($status) {
+        try {
+            $sql = "
+                SELECT b.*, 
+                       s.name as service_name, 
+                       u.first_name as client_first_name, 
+                       u.last_name as client_last_name,
+                       p.user_id as provider_user_id,
+                       pu.first_name as provider_first_name,
+                       pu.last_name as provider_last_name
+                FROM {$this->table} b
+                JOIN users u ON b.client_id = u.id
+                JOIN services s ON b.service_id = s.id
+                JOIN service_providers p ON b.provider_id = p.id
+                JOIN users pu ON p.user_id = pu.id
+                WHERE b.status = ?
+                ORDER BY b.booking_date DESC, b.start_time DESC
+            ";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$status]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting bookings by status: " . $e->getMessage());
+            return [];
         }
     }
 

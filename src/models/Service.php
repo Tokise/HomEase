@@ -2,32 +2,52 @@
 /**
  * Service Model
  */
-require_once SRC_PATH . '/database/Database.php';
-
 class Service {
     private $db;
     private $table = 'services';
     
     public function __construct() {
+        require_once __DIR__ . '/../database/Database.php';
         $this->db = Database::getInstance()->getConnection();
+        
+        if (!$this->db) {
+            throw new Exception("Failed to connect to database");
+        }
     }
     
     /**
      * Get all services
      */
     public function getAll() {
-        $sql = "SELECT s.*, c.name as category_name 
+        try {
+            $stmt = $this->db->query("
+                SELECT s.*, c.name as category_name
                 FROM {$this->table} s
                 JOIN service_categories c ON s.category_id = c.id
-                WHERE s.is_active = TRUE
-                ORDER BY s.id DESC";
-        
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                ORDER BY s.name ASC
+            ");
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log("Error getting all services: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Get active services
+     */
+    public function getActive() {
+        try {
+            $stmt = $this->db->query("
+                SELECT s.*, c.name as category_name
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE s.is_active = 1
+                ORDER BY s.name ASC
+            ");
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting active services: " . $e->getMessage());
             return [];
         }
     }
@@ -36,38 +56,35 @@ class Service {
      * Get service by ID
      */
     public function findById($id) {
-        $sql = "SELECT s.*, c.name as category_name 
+        try {
+            $stmt = $this->db->prepare("
+                SELECT s.*, c.name as category_name
                 FROM {$this->table} s
                 JOIN service_categories c ON s.category_id = c.id
-                WHERE s.id = :id 
-                LIMIT 1";
-        
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+                WHERE s.id = ?
+            ");
+            $stmt->execute([$id]);
+            return $stmt->fetch();
         } catch (PDOException $e) {
-            error_log("Error finding service: " . $e->getMessage());
-            return null;
+            error_log("Error finding service by ID: " . $e->getMessage());
+            return false;
         }
     }
     
     /**
-     * Get services by category ID
+     * Get services by category
      */
     public function getByCategory($categoryId) {
-        $sql = "SELECT s.*, c.name as category_name 
+        try {
+            $stmt = $this->db->prepare("
+                SELECT s.*, c.name as category_name
                 FROM {$this->table} s
                 JOIN service_categories c ON s.category_id = c.id
-                WHERE s.category_id = :category_id AND s.is_active = TRUE
-                ORDER BY s.name ASC";
-        
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                WHERE s.category_id = ? AND s.is_active = 1
+                ORDER BY s.name ASC
+            ");
+            $stmt->execute([$categoryId]);
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log("Error getting services by category: " . $e->getMessage());
             return [];
@@ -75,145 +92,182 @@ class Service {
     }
     
     /**
-     * Get featured services
+     * Create service
      */
-    public function getFeatured($limit = 6) {
-        $sql = "SELECT s.*, c.name as category_name 
-                FROM {$this->table} s
-                JOIN service_categories c ON s.category_id = c.id
-                WHERE s.is_active = TRUE
-                ORDER BY RAND()
-                LIMIT :limit";
-        
+    public function create($data) {
         try {
+            // Prepare fields and values
+            $fields = [];
+            $values = [];
+            $placeholders = [];
+            
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only include non-null values
+                    $fields[] = $field;
+                    $values[] = $value;
+                    $placeholders[] = '?';
+                }
+            }
+            
+            $fieldsStr = implode(', ', $fields);
+            $placeholdersStr = implode(', ', $placeholders);
+            
+            $sql = "INSERT INTO {$this->table} ($fieldsStr) VALUES ($placeholdersStr)";
+            
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $success = $stmt->execute($values);
+            
+            if ($success) {
+                return $this->db->lastInsertId();
+            }
+            return false;
         } catch (PDOException $e) {
-            error_log("Error getting featured services: " . $e->getMessage());
+            error_log("Error creating service: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Update service
+     */
+    public function update($id, $data) {
+        try {
+            $sets = [];
+            $values = [];
+            
+            foreach ($data as $field => $value) {
+                if ($value !== null) {  // Only update non-null values
+                    $sets[] = "$field = ?";
+                    $values[] = $value;
+                }
+            }
+            
+            $values[] = $id;  // Add ID for WHERE clause
+            $setsStr = implode(', ', $sets);
+            
+            $sql = "UPDATE {$this->table} SET $setsStr WHERE id = ?";
+            
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($values);
+        } catch (PDOException $e) {
+            error_log("Error updating service: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Delete service
+     */
+    public function delete($id) {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            error_log("Error deleting service: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Get service categories
+     */
+    public function getCategories() {
+        try {
+            $stmt = $this->db->query("SELECT * FROM service_categories WHERE is_active = 1 ORDER BY name ASC");
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error getting service categories: " . $e->getMessage());
             return [];
         }
     }
     
     /**
-     * Get services for a specific provider
+     * Search services
      */
-    public function getProviderServices($providerId) {
-        $providerId = (int)$providerId;
-        $result = $this->db->query("
-            SELECT s.id, s.name, s.category_id, c.name as category_name, ps.price, ps.duration
-            FROM services s
-            JOIN provider_services ps ON s.id = ps.service_id
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE ps.provider_id = {$providerId} AND s.is_active = TRUE
-            ORDER BY s.name ASC
-        ");
-        
-        $services = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $services[] = $row;
+    public function search($keyword) {
+        try {
+            $keyword = "%$keyword%";
+            $stmt = $this->db->prepare("
+                SELECT s.*, c.name as category_name
+                FROM {$this->table} s
+                JOIN service_categories c ON s.category_id = c.id
+                WHERE (s.name LIKE ? OR s.description LIKE ?) AND s.is_active = 1
+                ORDER BY s.name ASC
+            ");
+            $stmt->execute([$keyword, $keyword]);
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error searching services: " . $e->getMessage());
+            return [];
         }
-        
-        return $services;
     }
     
     /**
-     * Create a new service
+     * Get featured services
+     * 
+     * @param int $limit Number of services to return
+     * @return array Featured services
      */
-    public function create($serviceData) {
-        $categoryId = (int)$serviceData['category_id'];
-        $name = $this->db->escapeString($serviceData['name']);
-        $description = $this->db->escapeString($serviceData['description'] ?? '');
-        $price = (float)$serviceData['price'];
-        $duration = (int)$serviceData['duration'];
-        $image = isset($serviceData['image']) ? "'" . $this->db->escapeString($serviceData['image']) . "'" : 'NULL';
-        $isActive = isset($serviceData['is_active']) ? ($serviceData['is_active'] ? 'TRUE' : 'FALSE') : 'TRUE';
-        
-        $query = "INSERT INTO services (category_id, name, description, price, duration, image, is_active) 
-                  VALUES ({$categoryId}, '{$name}', '{$description}', {$price}, {$duration}, {$image}, {$isActive})";
-        
-        $this->db->query($query);
-        return $this->db->getLastInsertId();
-    }
-    
-    /**
-     * Update an existing service
-     */
-    public function update($id, $serviceData) {
-        $sets = [];
-        
-        if (isset($serviceData['category_id'])) {
-            $sets[] = "category_id = " . (int)$serviceData['category_id'];
+    public function getFeatured($limit = 4) {
+        try {
+            // First check if is_featured column exists
+            try {
+                $stmt = $this->db->query("SHOW COLUMNS FROM {$this->table} LIKE 'is_featured'");
+                $hasFeaturedColumn = $stmt->fetch() !== false;
+            } catch (PDOException $e) {
+                $hasFeaturedColumn = false;
+                error_log("Error checking for is_featured column: " . $e->getMessage());
+            }
+            
+            // If the column exists, use it to get featured services
+            if ($hasFeaturedColumn) {
+                $stmt = $this->db->prepare("
+                    SELECT s.*, c.name as category_name, 
+                           (SELECT AVG(rating) FROM reviews WHERE service_id = s.id) as avg_rating
+                    FROM {$this->table} s
+                    JOIN service_categories c ON s.category_id = c.id
+                    WHERE s.is_active = 1 AND s.is_featured = 1
+                    ORDER BY avg_rating DESC, s.name ASC
+                    LIMIT ?
+                ");
+                $stmt->execute([$limit]);
+                $featured = $stmt->fetchAll();
+            } else {
+                // If the column doesn't exist, just get the most recently added services
+                $featured = [];
+            }
+            
+            // If we don't have enough featured services, get the most popular ones
+            if (count($featured) < $limit) {
+                $neededMore = $limit - count($featured);
+                $existingIds = array_column($featured, 'id');
+                $notInClause = count($existingIds) > 0 
+                    ? "AND s.id NOT IN (" . implode(',', array_fill(0, count($existingIds), '?')) . ")" 
+                    : "";
+                
+                $sql = "
+                    SELECT s.*, c.name as category_name
+                    FROM {$this->table} s
+                    JOIN service_categories c ON s.category_id = c.id
+                    WHERE s.is_active = 1 $notInClause
+                    ORDER BY s.created_at DESC, s.name ASC
+                    LIMIT ?
+                ";
+                
+                $stmt = $this->db->prepare($sql);
+                
+                $params = $existingIds;
+                $params[] = $neededMore;
+                $stmt->execute($params);
+                $popular = $stmt->fetchAll();
+                
+                $featured = array_merge($featured, $popular);
+            }
+            
+            return $featured;
+        } catch (PDOException $e) {
+            error_log("Error getting featured services: " . $e->getMessage());
+            return [];
         }
-        
-        if (isset($serviceData['name'])) {
-            $sets[] = "name = '" . $this->db->escapeString($serviceData['name']) . "'";
-        }
-        
-        if (isset($serviceData['description'])) {
-            $sets[] = "description = '" . $this->db->escapeString($serviceData['description']) . "'";
-        }
-        
-        if (isset($serviceData['price'])) {
-            $sets[] = "price = " . (float)$serviceData['price'];
-        }
-        
-        if (isset($serviceData['duration'])) {
-            $sets[] = "duration = " . (int)$serviceData['duration'];
-        }
-        
-        if (isset($serviceData['image'])) {
-            $sets[] = "image = '" . $this->db->escapeString($serviceData['image']) . "'";
-        }
-        
-        if (isset($serviceData['is_active'])) {
-            $sets[] = "is_active = " . ($serviceData['is_active'] ? 'TRUE' : 'FALSE');
-        }
-        
-        if (empty($sets)) {
-            return false;
-        }
-        
-        $query = "UPDATE services SET " . implode(', ', $sets) . " WHERE id = " . (int)$id;
-        $this->db->query($query);
-        
-        return $this->db->getAffectedRows() > 0;
-    }
-    
-    /**
-     * Delete a service
-     */
-    public function delete($id) {
-        $id = (int)$id;
-        $this->db->query("DELETE FROM services WHERE id = {$id}");
-        return $this->db->getAffectedRows() > 0;
-    }
-    
-    /**
-     * Search services by name or description
-     */
-    public function search($searchTerm, $limit = 10) {
-        $searchTerm = $this->db->escapeString($searchTerm);
-        $limit = (int)$limit;
-        
-        $result = $this->db->query("
-            SELECT s.*, c.name as category_name 
-            FROM services s
-            JOIN service_categories c ON s.category_id = c.id
-            WHERE s.is_active = TRUE 
-            AND (s.name LIKE '%{$searchTerm}%' OR s.description LIKE '%{$searchTerm}%')
-            ORDER BY s.name ASC
-            LIMIT {$limit}
-        ");
-        
-        $services = [];
-        
-        while ($row = $result->fetch_assoc()) {
-            $services[] = $row;
-        }
-        
-        return $services;
     }
 } 
