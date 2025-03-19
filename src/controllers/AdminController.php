@@ -13,231 +13,227 @@ class AdminController extends Controller {
     private $bookingModel;
     
     public function __construct() {
-        // Check if user is logged in and is an admin
-        $this->authCheck();
-        
+        parent::__construct();
         $this->userModel = new User();
         $this->serviceModel = new Service();
         $this->bookingModel = new Booking();
     }
     
     /**
-     * Authentication check for admin
-     */
-    private function authCheck() {
-        if (!isset($_SESSION['user_id'])) {
-            $_SESSION['flash_message'] = 'You need to be logged in to access this page.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/auth/login');
-            exit;
-        }
-        
-        if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != ROLE_ADMIN) {
-            $_SESSION['flash_message'] = 'You do not have permission to access the admin area.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/auth/login');
-            exit;
-        }
-    }
-    
-    /**
      * Display admin dashboard
      */
     public function dashboard() {
-        // Get counts for dashboard statistics
-        $userCount = count($this->userModel->getAll());
-        $clientCount = count($this->userModel->getByRole(ROLE_CLIENT));
-        $providerCount = count($this->userModel->getByRole(ROLE_SERVICE_PROVIDER));
-        $serviceCount = count($this->serviceModel->getAll());
-        $bookingCount = count($this->bookingModel->getAll());
-        
-        // Get recent bookings
-        $recentBookings = $this->bookingModel->getRecent(5);
-        
-        // Get recent users
-        $recentUsers = $this->userModel->getRecent(5);
-        
+        // Require admin authentication
+        $this->requireRole(ROLE_ADMIN);
+
+        // Get statistics
+        $totalUsers = $this->userModel->getTotalUsers();
+        $totalProviders = $this->userModel->getTotalProviders();
+        $totalBookings = $this->bookingModel->getTotalBookings();
+        $totalRevenue = $this->bookingModel->getTotalRevenue();
+        $recentUsers = $this->userModel->getRecentUsers(5);
+        $recentBookings = $this->bookingModel->getRecentBookings(5);
+
         $this->render('admin/dashboard', [
-            'title' => 'Admin Dashboard | HomEase',
-            'userCount' => $userCount,
-            'clientCount' => $clientCount,
-            'providerCount' => $providerCount,
-            'serviceCount' => $serviceCount,
-            'bookingCount' => $bookingCount,
+            'title' => 'Admin Dashboard',
+            'totalUsers' => $totalUsers,
+            'totalProviders' => $totalProviders,
+            'totalBookings' => $totalBookings,
+            'totalRevenue' => $totalRevenue,
+            'recentUsers' => $recentUsers,
             'recentBookings' => $recentBookings,
-            'recentUsers' => $recentUsers
+            'styles' => ['dashboard']
         ]);
     }
     
     /**
-     * Manage users
+     * Display users management page
      */
     public function users() {
-        $users = $this->userModel->getAll();
+        $this->requireRole(ROLE_ADMIN);
         
+        $users = $this->userModel->getAllUsers();
         $this->render('admin/users', [
-            'title' => 'Manage Users | Admin Dashboard',
-            'users' => $users
+            'title' => 'Manage Users',
+            'users' => $users,
+            'styles' => ['users']
         ]);
     }
     
     /**
-     * View user details
+     * Display service providers management page
      */
-    public function viewUser($id) {
-        $user = $this->userModel->findById($id);
+    public function providers() {
+        $this->requireRole(ROLE_ADMIN);
         
-        if (!$user) {
-            $_SESSION['flash_message'] = 'User not found.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/admin/users');
-            return;
-        }
-        
-        $this->render('admin/view-user', [
-            'title' => 'User Details | Admin Dashboard',
-            'user' => $user
+        $providers = $this->userModel->getAllProviders();
+        $this->render('admin/providers', [
+            'title' => 'Manage Service Providers',
+            'providers' => $providers,
+            'styles' => ['providers']
         ]);
     }
     
     /**
-     * Edit user
+     * Update user status (active/inactive)
      */
-    public function editUser($id) {
-        $user = $this->userModel->findById($id);
+    public function updateUserStatus($userId) {
+        $this->requireRole(ROLE_ADMIN);
         
-        if (!$user) {
-            $_SESSION['flash_message'] = 'User not found.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/admin/users');
-            return;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $status = isset($_POST['is_active']) ? 1 : 0;
+            
+            if ($this->userModel->updateStatus($userId, $status)) {
+                $_SESSION['flash_message'] = 'User status updated successfully';
+                $_SESSION['flash_type'] = 'success';
+            } else {
+                $_SESSION['flash_message'] = 'Failed to update user status';
+                $_SESSION['flash_type'] = 'danger';
+            }
+            
+            $this->redirect($_SERVER['HTTP_REFERER']);
         }
+    }
+    
+    /**
+     * Display service categories management
+     */
+    public function categories() {
+        $this->requireRole(ROLE_ADMIN);
         
-        $this->render('admin/edit-user', [
-            'title' => 'Edit User | Admin Dashboard',
-            'user' => $user
+        $categories = $this->serviceModel->getAllCategories();
+        $this->render('admin/categories', [
+            'title' => 'Manage Service Categories',
+            'categories' => $categories,
+            'styles' => ['categories']
         ]);
     }
     
     /**
-     * Process edit user form
+     * Create service category
      */
-    public function processEditUser($id) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect(APP_URL . '/admin/users');
-            return;
+    public function createCategory() {
+        $this->requireRole(ROLE_ADMIN);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $categoryData = [
+                'name' => trim($_POST['name']),
+                'description' => trim($_POST['description'])
+            ];
+
+            if ($this->serviceModel->createCategory($categoryData)) {
+                $_SESSION['flash_message'] = 'Category created successfully';
+                $_SESSION['flash_type'] = 'success';
+            } else {
+                $_SESSION['flash_message'] = 'Failed to create category';
+                $_SESSION['flash_type'] = 'danger';
+            }
+            
+            $this->redirect(APP_URL . '/admin/categories');
         }
-        
-        $user = $this->userModel->findById($id);
-        
-        if (!$user) {
-            $_SESSION['flash_message'] = 'User not found.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/admin/users');
-            return;
-        }
-        
-        // Get form data
-        $firstName = trim($_POST['first_name'] ?? '');
-        $lastName = trim($_POST['last_name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
-        $roleId = (int)($_POST['role_id'] ?? ROLE_CLIENT);
-        $isActive = isset($_POST['is_active']) ? true : false;
-        
-        // Basic validation
-        if (empty($firstName) || empty($lastName) || empty($email)) {
-            $_SESSION['flash_message'] = 'Please fill in all required fields.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/admin/edit-user/' . $id);
-            return;
-        }
-        
-        // Update user data
-        $userData = [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'email' => $email,
-            'phone_number' => $phone,
-            'role_id' => $roleId,
-            'is_active' => $isActive
-        ];
-        
-        // Update password if provided
-        $password = $_POST['password'] ?? '';
-        if (!empty($password)) {
-            $userData['password'] = password_hash($password, PASSWORD_DEFAULT);
-        }
-        
-        // Update user
-        $result = $this->userModel->update($id, $userData);
-        
-        if ($result) {
-            $_SESSION['flash_message'] = 'User updated successfully.';
-            $_SESSION['flash_type'] = 'success';
-        } else {
-            $_SESSION['flash_message'] = 'Failed to update user.';
-            $_SESSION['flash_type'] = 'danger';
-        }
-        
-        $this->redirect(APP_URL . '/admin/users');
     }
     
     /**
-     * Delete user
+     * Update service category
      */
-    public function deleteUser($id) {
-        // Prevent self-deletion
-        if ((int)$id === (int)$_SESSION['user_id']) {
-            $_SESSION['flash_message'] = 'You cannot delete your own account.';
-            $_SESSION['flash_type'] = 'danger';
-            $this->redirect(APP_URL . '/admin/users');
-            return;
+    public function updateCategory($categoryId) {
+        $this->requireRole(ROLE_ADMIN);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $categoryData = [
+                'name' => trim($_POST['name']),
+                'description' => trim($_POST['description']),
+                'is_active' => isset($_POST['is_active']) ? 1 : 0
+            ];
+
+            if ($this->serviceModel->updateCategory($categoryId, $categoryData)) {
+                $_SESSION['flash_message'] = 'Category updated successfully';
+                $_SESSION['flash_type'] = 'success';
+            } else {
+                $_SESSION['flash_message'] = 'Failed to update category';
+                $_SESSION['flash_type'] = 'danger';
+            }
+            
+            $this->redirect(APP_URL . '/admin/categories');
         }
-        
-        $result = $this->userModel->delete($id);
-        
-        if ($result) {
-            $_SESSION['flash_message'] = 'User deleted successfully.';
-            $_SESSION['flash_type'] = 'success';
-        } else {
-            $_SESSION['flash_message'] = 'Failed to delete user.';
-            $_SESSION['flash_type'] = 'danger';
-        }
-        
-        $this->redirect(APP_URL . '/admin/users');
     }
     
     /**
-     * Manage services
-     */
-    public function services() {
-        $services = $this->serviceModel->getAll();
-        
-        $this->render('admin/services', [
-            'title' => 'Manage Services | Admin Dashboard',
-            'services' => $services
-        ]);
-    }
-    
-    /**
-     * Manage bookings
+     * Display bookings overview
      */
     public function bookings() {
-        $bookings = $this->bookingModel->getAll();
+        $this->requireRole(ROLE_ADMIN);
         
+        $bookings = $this->bookingModel->getAllBookingsWithDetails();
         $this->render('admin/bookings', [
-            'title' => 'Manage Bookings | Admin Dashboard',
-            'bookings' => $bookings
+            'title' => 'Bookings Overview',
+            'bookings' => $bookings,
+            'styles' => ['bookings']
         ]);
     }
     
     /**
-     * View system settings
+     * Display reports and analytics
      */
-    public function settings() {
-        $this->render('admin/settings', [
-            'title' => 'System Settings | Admin Dashboard'
+    public function reports() {
+        $this->requireRole(ROLE_ADMIN);
+        
+        // Get various statistics and analytics data
+        $monthlyBookings = $this->bookingModel->getMonthlyBookings();
+        $monthlyRevenue = $this->bookingModel->getMonthlyRevenue();
+        $topServices = $this->serviceModel->getTopServices();
+        $topProviders = $this->userModel->getTopProviders();
+
+        $this->render('admin/reports', [
+            'title' => 'Reports & Analytics',
+            'monthlyBookings' => $monthlyBookings,
+            'monthlyRevenue' => $monthlyRevenue,
+            'topServices' => $topServices,
+            'topProviders' => $topProviders,
+            'styles' => ['reports']
         ]);
+    }
+    
+    /**
+     * Display admin profile
+     */
+    public function profile() {
+        $this->requireRole(ROLE_ADMIN);
+        $admin = $this->getCurrentUser();
+        
+        $this->render('admin/profile', [
+            'title' => 'Admin Profile',
+            'admin' => $admin,
+            'styles' => ['profile']
+        ]);
+    }
+    
+    /**
+     * Update admin profile
+     */
+    public function updateProfile() {
+        $this->requireRole(ROLE_ADMIN);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userId = $_SESSION['user_id'];
+            $userData = [
+                'first_name' => trim($_POST['first_name']),
+                'last_name' => trim($_POST['last_name']),
+                'phone_number' => trim($_POST['phone_number'])
+            ];
+
+            if ($this->userModel->update($userId, $userData)) {
+                $_SESSION['flash_message'] = 'Profile updated successfully';
+                $_SESSION['flash_type'] = 'success';
+                
+                // Update session name
+                $_SESSION['user_name'] = $userData['first_name'] . ' ' . $userData['last_name'];
+            } else {
+                $_SESSION['flash_message'] = 'Failed to update profile';
+                $_SESSION['flash_type'] = 'danger';
+            }
+            
+            $this->redirect(APP_URL . '/admin/profile');
+        }
     }
 } 

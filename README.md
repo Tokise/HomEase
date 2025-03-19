@@ -1,45 +1,79 @@
-# HomEase - Home Services Platform
+# HomEase
 
-HomEase is a comprehensive web application for connecting home service providers with clients. The platform facilitates the booking, management, and tracking of home services with an elegant monochromatic interface.
+HomEase is a home service management system that helps connect homeowners with service providers.
 
-## Features
+## Prerequisites
 
-- **User Authentication**: Secure login and registration with Google Authentication
-- **Multiple User Roles**:
-  - **Admin**: System administration and oversight
-  - **Manager**: Service provider management
-  - **Client**: End-users seeking home services
-- **Google Maps Integration**: Real-time directions and service provider tracking
-- **Responsive Design**: Clean, monochromatic black and white theme
-- **Service Booking**: Easy scheduling and management of service appointments
-- **Provider Ratings**: Quality assurance through customer reviews
-
-## Tech Stack
-
-- **Backend**: PHP
-- **Frontend**: HTML5, Custom CSS (no frameworks)
-- **Database**: MySQL
-- **Authentication**: Google OAuth 2.0
-- **Maps**: Google Maps JavaScript API
-- **Design**: Monochromatic black and white theme
+- PHP 8.0 or higher
+- Composer
+- XAMPP (or similar local development environment)
+- MySQL Database
+- Google Cloud Platform account (for Google API features)
 
 ## Installation
 
-1. Clone the repository:
+1. Clone the repository to your XAMPP htdocs folder:
+```bash
+git clone [repository-url] HomEase
+cd HomEase
+```
+
+2. Install PHP dependencies using Composer:
+```bash
+composer require google/apiclient:^2.15.0
+composer require vlucas/phpdotenv:^5.5
+composer require ralouphie/getallheaders:^3.0.3
+composer require guzzlehttp/guzzle:^7.8
+composer require firebase/php-jwt:^6.8
+composer require monolog/monolog:^3.0
+```
+
+3. Create environment file:
+   - Copy `.env.example` to `.env`
+   - Update the `.env` file with your configuration:
+     - Database credentials
+     - Google API credentials
+     - Application URL
+     - Other required settings
+
+4. Set up Google Cloud Platform:
+   - Create a new project in Google Cloud Console
+   - Enable necessary APIs (Google Calendar, Google Maps, etc.)
+   - Create OAuth 2.0 credentials
+   - Download your credentials JSON file
+   - Update the GOOGLE_APPLICATION_CREDENTIALS path in `.env`
+
+5. Database Setup:
+   - Create a new MySQL database
+   - Update the database configuration in `.env`:
+     ```
+     DB_HOST=localhost
+     DB_NAME=homease
+     DB_USER=your_username
+     DB_PASS=your_password
+     ```
+
+## Configuration
+
+### Google API Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select an existing one
+3. Enable the required APIs:
+   - Google Calendar API
+   - Google Maps API
+   - Google OAuth 2.0
+4. Create credentials (OAuth 2.0 Client ID)
+5. Add the credentials to your `.env` file:
    ```
-   git clone https://github.com/yourusername/HomEase.git
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
+   GOOGLE_REDIRECT_URI=http://localhost/HomEase/public/auth/google-handler
    ```
 
-2. Set up your web server (Apache/XAMPP) to point to the project directory
+## Running the Application
 
-3. Import the database schema:
-   ```
-   mysql -u username -p database_name < database/schema.sql
-   ```
-
-4. Configure your Google API credentials in `config/config.php`
-
-5. Access the application through your web browser:
+1. Start your XAMPP server (Apache and MySQL)
+2. Access the application through your web browser:
    ```
    http://localhost/HomEase
    ```
@@ -63,26 +97,27 @@ HomEase/
 └── vendor/               # Dependencies (if any)
 ```
 
-## Setup for Development
+## Features
 
-1. Register a project in the Google Developer Console
-2. Enable Google OAuth 2.0 and Google Maps JavaScript API
-3. Create credentials and add them to your configuration
-4. Configure your database connection in `config/config.php`
+- User Authentication (Local and Google)
+- Service Provider Management
+- Booking System
+- Calendar Integration
+- Real-time Notifications
+- Payment Processing
+- Review and Rating System
 
-## Usage
+## Security Notes
 
-- **Admin Panel**: Access via `/admin` after logging in with admin credentials
-- **Service Provider Dashboard**: Available to users with manager role
-- **Client Booking**: Main interface for end-users to book services
+- Never commit your `.env` file to version control
+- Keep your Google API credentials secure
+- Regularly update dependencies
+- Use HTTPS in production
 
-## Security Considerations
+## Support
 
-- All user passwords are securely hashed
-- CSRF protection is implemented for all forms
-- Input validation is performed for all user inputs
-- Authentication is required for sensitive operations
+For support, please email [support email] or open an issue in the repository.
 
 ## License
 
-[MIT](LICENSE) 
+[Your License Information] 

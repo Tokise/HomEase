@@ -1,6 +1,6 @@
 <?php
 /**
- * HomEase - Configuration File
+ * HomeSwift - Configuration File
  */
 
 // Load environment variables from .env file
@@ -46,15 +46,15 @@ function env($key, $default = null) {
 }
 
 // Application Constants
-define('APP_NAME', env('APP_NAME', 'HomEase'));
-define('APP_URL', env('APP_URL', 'http://localhost/HomEase'));
+define('APP_NAME', env('APP_NAME', 'HomeSwift'));
+define('APP_URL', env('APP_URL', 'http://localhost/HomeSwift'));
 define('APP_ENV', env('APP_ENV', 'development'));
 define('DEBUG_MODE', env('APP_DEBUG', 'true') === 'true');
 
-// Role Constants
+// Role Constants - Main definition point
 define('ROLE_ADMIN', 1);
-define('ROLE_SERVICE_PROVIDER', 2);
-define('ROLE_CLIENT', 3);
+define('ROLE_PROVIDER', 2); // Changed from ROLE_SERVICE_PROVIDER
+define('ROLE_CLIENT', 3); // Will be used instead of ROLE_CUSTOMER
 
 // Google Configuration
 define('GOOGLE_CLIENT_ID', env('GOOGLE_CLIENT_ID'));
@@ -64,7 +64,7 @@ define('GOOGLE_MAPS_API_KEY', env('GOOGLE_API_KEY'));
 
 // Database Configuration
 define('DB_HOST', env('DB_HOST', 'localhost'));
-define('DB_NAME', env('DB_NAME', 'homease'));
+define('DB_NAME', env('DB_NAME', 'homeswift'));
 define('DB_USER', env('DB_USER', 'root'));
 define('DB_PASS', env('DB_PASS', ''));
 
@@ -78,7 +78,7 @@ define('MAIL_USERNAME', env('MAIL_USERNAME'));
 define('MAIL_PASSWORD', env('MAIL_PASSWORD'));
 define('MAIL_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls'));
 define('MAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS'));
-define('MAIL_FROM_NAME', env('MAIL_FROM_NAME', 'HomEase Support'));
+define('MAIL_FROM_NAME', env('MAIL_FROM_NAME', 'HomeSwift Support'));
 
 // Error Handling
 if (DEBUG_MODE) {
@@ -92,4 +92,4 @@ if (DEBUG_MODE) {
 }
 
 // Time Zone
-date_default_timezone_set('UTC'); 
+date_default_timezone_set('UTC');

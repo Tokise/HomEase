@@ -55,7 +55,7 @@
 <!-- Features Section -->
 <section class="features-section">
     <div class="container">
-        <h2 class="section-title">Why Choose HomEase?</h2>
+        <h2 class="section-title">Why Choose HomeSwift?</h2>
         
         <div class="features-grid">
             <div class="feature-card">
@@ -149,7 +149,7 @@
         <div class="providers-content">
             <div class="providers-info">
                 <h2>Are You a Service Professional?</h2>
-                <p>Join our network of trusted service providers and grow your business with HomEase.</p>
+                <p>Join our network of trusted service providers and grow your business with HomeSwift.</p>
                 <ul class="providers-benefits">
                     <li><i class="fas fa-check"></i> Reach more customers in your area</li>
                     <li><i class="fas fa-check"></i> Flexible scheduling that works for you</li>
@@ -182,7 +182,7 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>"HomEase made finding a reliable plumber so easy! The service was prompt, professional and exactly what I needed. I'll definitely be using HomEase again."</p>
+                    <p>"HomeSwift made finding a reliable plumber so easy! The service was prompt, professional and exactly what I needed. I'll definitely be using HomeSwift again."</p>
                 </div>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">
@@ -204,7 +204,7 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                     </div>
-                    <p>"I've tried several home service platforms, but HomEase stands out for its quality and reliability. The cleaning service I booked exceeded my expectations!"</p>
+                    <p>"I've tried several home service platforms, but HomeSwift stands out for its quality and reliability. The cleaning service I booked exceeded my expectations!"</p>
                 </div>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">
@@ -226,7 +226,7 @@
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star-half-alt"></i>
                     </div>
-                    <p>"As a busy mom, finding time for home maintenance is challenging. HomEase connected me with an excellent electrician who fixed everything efficiently and professionally."</p>
+                    <p>"As a busy mom, finding time for home maintenance is challenging. HomeSwift connected me with an excellent electrician who fixed everything efficiently and professionally."</p>
                 </div>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">

@@ -21,12 +21,24 @@ class HomeController extends Controller {
     }
     
     /**
-     * Landing page
+     * Display home page
      */
     public function index() {
         try {
-            // Check if user is authenticated and redirect to appropriate dashboard
-            if ($this->isAuthenticated()) {
+            // Check if this is a preview request
+            $isPreview = isset($_GET['preview']) && $_GET['preview'] === 'true';
+            
+            // Store original session data if in preview mode
+            $originalSession = null;
+            if ($isPreview) {
+                $originalSession = $_SESSION;
+                session_write_close();
+                session_start();
+                $_SESSION = array(); // Clear session data for preview
+            }
+            
+            // Only redirect if not in preview mode
+            if (!$isPreview && $this->isAuthenticated()) {
                 $user = $this->getCurrentUser();
                 if (!$user) {
                     // If session exists but user not found, clear session
@@ -42,7 +54,7 @@ class HomeController extends Controller {
                     case ROLE_ADMIN:
                         $this->redirect(APP_URL . '/admin/dashboard');
                         break;
-                    case ROLE_SERVICE_PROVIDER:
+                    case ROLE_PROVIDER:
                         $this->redirect(APP_URL . '/provider/dashboard');
                         break;
                     case ROLE_CLIENT:
@@ -71,16 +83,25 @@ class HomeController extends Controller {
                 error_log("Error fetching services/categories: " . $e->getMessage());
             }
             
+            // Render the landing page
             $this->render('home/landing', [
-                'title' => 'Home Services Made Easy - HomEase',
+                'title' => 'Home Services Made Easy - HomeSwift',
                 'featuredServices' => $featuredServices,
-                'categories' => $categories
+                'categories' => $categories,
+                'isPreview' => $isPreview
             ]);
+            
+            // Restore original session if in preview mode
+            if ($isPreview && $originalSession) {
+                session_write_close();
+                session_start();
+                $_SESSION = $originalSession;
+            }
             
         } catch (Exception $e) {
             error_log("Error in HomeController::index: " . $e->getMessage());
             $this->render('home/landing', [
-                'title' => 'Home Services Made Easy - HomEase',
+                'title' => 'Home Services Made Easy - HomeSwift',
                 'error' => 'An error occurred while loading the page.'
             ]);
         }

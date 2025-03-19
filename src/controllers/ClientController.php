@@ -100,24 +100,62 @@ class ClientController extends Controller {
         $userId = $_SESSION['user_id'];
         
         $userData = [
-            'first_name' => $_POST['first_name'] ?? '',
-            'last_name' => $_POST['last_name'] ?? '',
-            'phone' => $_POST['phone'] ?? '',
-            'address' => $_POST['address'] ?? ''
+            'first_name' => trim($_POST['first_name'] ?? ''),
+            'last_name' => trim($_POST['last_name'] ?? ''),
+            'phone_number' => trim($_POST['phone_number'] ?? ''),
+            'address' => trim($_POST['address'] ?? '')
         ];
 
         // Handle profile picture upload if present
         if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['profile_picture'];
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            $maxSize = 2 * 1024 * 1024; // 2MB
+
+            // Validate file type and size
+            if (!in_array($file['type'], $allowedTypes)) {
+                $_SESSION['flash_message'] = 'Invalid file type. Please upload a JPG or PNG image.';
+                $_SESSION['flash_type'] = 'danger';
+                $this->redirect(APP_URL . '/client/profile');
+                return;
+            }
+
+            if ($file['size'] > $maxSize) {
+                $_SESSION['flash_message'] = 'File is too large. Maximum size is 2MB.';
+                $_SESSION['flash_type'] = 'danger';
+                $this->redirect(APP_URL . '/client/profile');
+                return;
+            }
+
+            // Create upload directory if it doesn't exist
             $uploadDir = ROOT_PATH . '/public/uploads/profile/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
 
-            $fileName = time() . '_' . basename($_FILES['profile_picture']['name']);
+            // Generate unique filename
+            $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $fileName = uniqid('profile_') . '_' . time() . '.' . $extension;
             $uploadPath = $uploadDir . $fileName;
 
-            if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $uploadPath)) {
+            // Delete old profile picture if exists
+            $currentUser = $this->userModel->findById($userId);
+            if (!empty($currentUser['profile_picture'])) {
+                $oldFile = ROOT_PATH . $currentUser['profile_picture'];
+                if (file_exists($oldFile) && is_file($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+
+            // Upload new file
+            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
                 $userData['profile_picture'] = '/public/uploads/profile/' . $fileName;
+            } else {
+                error_log("Failed to move uploaded file from {$file['tmp_name']} to {$uploadPath}");
+                $_SESSION['flash_message'] = 'Failed to upload profile picture. Please try again.';
+                $_SESSION['flash_type'] = 'danger';
+                $this->redirect(APP_URL . '/client/profile');
+                return;
             }
         }
 
@@ -231,7 +269,7 @@ class ClientController extends Controller {
                             <td><?= date('h:i A', strtotime($booking['start_time'])) ?></td>
                             <td><?= htmlspecialchars($booking['provider_first_name'] . ' ' . $booking['provider_last_name']) ?></td>
                             <td><span class="badge bg-<?= $this->getStatusBadgeClass($booking['status']) ?>"><?= ucfirst($booking['status']) ?></span></td>
-                            <td>$<?= number_format($booking['total_amount'], 2) ?></td>
+                            <td>$<?= number_format($booking['total_price'], 2) ?></td>
                             <td class="booking-actions">
                                 <?php if ($booking['status'] !== 'cancelled' && $booking['status'] !== 'completed'): ?>
                                     <?php 
@@ -294,5 +332,47 @@ class ClientController extends Controller {
             default:
                 return 'secondary';
         }
+    }
+
+    /**
+     * Remove profile picture
+     */
+    public function removeProfilePicture() {
+        // Check if user is logged in and is a client
+        if (!$this->isUserLoggedIn() || $_SESSION['user_role'] != ROLE_CLIENT) {
+            $_SESSION['flash_message'] = 'You must be logged in as a client to access this page';
+            $_SESSION['flash_type'] = 'danger';
+            $this->redirect(APP_URL . '/auth/login');
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $user = $this->userModel->findById($userId);
+
+        if (!$user) {
+            $_SESSION['flash_message'] = 'User not found';
+            $_SESSION['flash_type'] = 'danger';
+            $this->redirect(APP_URL . '/client/profile');
+            return;
+        }
+
+        // Delete the profile picture file if it exists
+        if (!empty($user['profile_picture'])) {
+            $filePath = ROOT_PATH . $user['profile_picture'];
+            if (file_exists($filePath) && is_file($filePath)) {
+                unlink($filePath);
+            }
+
+            // Update user record to remove profile picture reference
+            $this->userModel->update($userId, ['profile_picture' => null]);
+            
+            $_SESSION['flash_message'] = 'Profile picture removed successfully';
+            $_SESSION['flash_type'] = 'success';
+        } else {
+            $_SESSION['flash_message'] = 'No profile picture to remove';
+            $_SESSION['flash_type'] = 'info';
+        }
+
+        $this->redirect(APP_URL . '/client/profile');
     }
 } 

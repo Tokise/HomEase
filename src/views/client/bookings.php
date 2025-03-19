@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings - HomEase</title>
+    <title>My Bookings - HomeSwift</title>
     
     <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
  <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomEase" height="40">
+                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" height="40">
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
@@ -144,7 +144,7 @@
                                                         <?= ucfirst(htmlspecialchars($booking['status'])) ?>
                                                     </span>
                                                 </td>
-                                                <td class="booking-total fw-medium">$<?= number_format($booking['total_amount'], 2) ?></td>
+                                                <td class="booking-total fw-medium">$<?= number_format($booking['total_price'], 2) ?></td>
                                                 <td class="booking-actions">
                                                     <div class="action-buttons">
                                                         <a href="<?= APP_URL ?>/client/viewBooking/<?= $booking['id'] ?>" 

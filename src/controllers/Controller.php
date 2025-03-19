@@ -122,11 +122,39 @@ class Controller {
     /**
      * Require specific role or redirect
      */
-    protected function requireRole($roleId) {
-        $this->requireAuth();
-        
-        if (!$this->hasRole($roleId)) {
-            $this->redirect(APP_URL . '/error/forbidden');
+    protected function requireRole($requiredRole) {
+        // Check if user is logged in
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['flash_message'] = 'Please login to access this page';
+            $_SESSION['flash_type'] = 'warning';
+            $_SESSION['intended_url'] = $_SERVER['REQUEST_URI'];
+            $this->redirect(APP_URL . '/auth/login');
+            exit();
+        }
+
+        // Check if user has the required role
+        if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != $requiredRole) {
+            $_SESSION['flash_message'] = 'You are not authorized to access this page';
+            $_SESSION['flash_type'] = 'danger';
+            
+            // Redirect based on user's role
+            $redirectUrl = APP_URL . '/';
+            switch ($_SESSION['user_role']) {
+                case ROLE_CLIENT:
+                    $redirectUrl .= 'client/dashboard';
+                    break;
+                case ROLE_PROVIDER:
+                    $redirectUrl .= 'provider/dashboard';
+                    break;
+                case ROLE_ADMIN:
+                    $redirectUrl .= 'admin/dashboard';
+                    break;
+                default:
+                    $redirectUrl .= 'home';
+            }
+            
+            $this->redirect($redirectUrl);
+            exit();
         }
     }
     
@@ -137,7 +165,7 @@ class Controller {
         switch ($roleId) {
             case ROLE_ADMIN:
                 return 'Administrator';
-            case ROLE_SERVICE_PROVIDER:
+            case ROLE_PROVIDER:
                 return 'Service Provider';
             case ROLE_CLIENT:
                 return 'Client';
@@ -153,7 +181,7 @@ class Controller {
         switch ($roleId) {
             case ROLE_ADMIN:
                 return 'danger';
-            case ROLE_SERVICE_PROVIDER:
+            case ROLE_PROVIDER:
                 return 'success';
             case ROLE_CLIENT:
                 return 'primary';
@@ -197,4 +225,4 @@ class Controller {
                 return 'secondary';
         }
     }
-} 
+}

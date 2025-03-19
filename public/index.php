@@ -44,7 +44,7 @@ try {
     }
     
     // Remove base path from request URI
-    $basePath = '/HomEase';
+    $basePath = '/HomeSwift';
     $requestUri = str_replace($basePath, '', $requestUri);
     $requestUri = str_replace('/public', '', $requestUri);
     $requestUri = str_replace('/index.php', '', $requestUri);
@@ -57,20 +57,27 @@ try {
     }
     
     // Handle empty path (root URL)
-    if (empty($path)) {
+    if (empty($path) || $path === '/') {
         require_once SRC_PATH . '/controllers/HomeController.php';
         $controller = new HomeController();
         $controller->index();
         exit;
     }
     
-    // Split the path into segments
-    $segments = explode('/', $path);
-    
-    // Get controller, action, and parameters
-    $controller = !empty($segments[0]) ? strtolower($segments[0]) : 'home';
-    $action = isset($segments[1]) ? strtolower($segments[1]) : 'index';
-    $params = array_slice($segments, 2);
+    // Get controller from GET parameter if present (for root URL handling)
+    if (isset($_GET['controller']) && isset($_GET['action'])) {
+        $controller = strtolower($_GET['controller']);
+        $action = strtolower($_GET['action']);
+        $params = [];
+    } else {
+        // Split the path into segments
+        $segments = explode('/', $path);
+        
+        // Get controller, action, and parameters
+        $controller = !empty($segments[0]) ? strtolower($segments[0]) : 'home';
+        $action = isset($segments[1]) ? strtolower($segments[1]) : 'index';
+        $params = array_slice($segments, 2);
+    }
 
     // Debug logging
     if (DEBUG_MODE) {

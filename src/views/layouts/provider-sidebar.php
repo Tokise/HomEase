@@ -6,15 +6,15 @@ $pathSegments = explode('/', $currentPath);
 
 // Set current page based on URL
 $currentPage = end($pathSegments);
-if ($currentPage === 'admin' || $currentPage === 'dashboard') {
+if ($currentPage === 'provider' || $currentPage === 'dashboard') {
     $currentPage = 'dashboard';
 }
 ?>
-<!-- Admin Sidebar -->
+<!-- Provider Sidebar -->
 <style>
-    .admin-sidebar {
+    .provider-sidebar {
         width: 250px;
-        background: #2d3436;
+        background: #233876;
         color: #fff;
         position: fixed;
         top: 0;
@@ -102,84 +102,91 @@ if ($currentPage === 'admin' || $currentPage === 'dashboard') {
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .admin-sidebar {
+        .provider-sidebar {
             transform: translateX(-100%);
         }
 
-        .admin-sidebar.show {
+        .provider-sidebar.show {
             transform: translateX(0);
         }
     }
 </style>
 
-<div class="admin-sidebar">
-    <a href="<?= APP_URL ?>/admin/dashboard" class="sidebar-brand">
-            HomeSwift Admin
+<div class="provider-sidebar">
+    <a href="<?= APP_URL ?>/provider/dashboard" class="sidebar-brand">
+        Provider Portal
     </a>
     
     <ul class="sidebar-menu">
         <li>
-            <a href="<?= APP_URL ?>/admin/dashboard" class="sidebar-link <?= ($currentPage === 'dashboard') ? 'active' : '' ?>">
+            <a href="<?= APP_URL ?>/provider/dashboard" class="sidebar-link <?= ($currentPage === 'dashboard') ? 'active' : '' ?>">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
         </li>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/users" class="sidebar-link <?= ($currentPage === 'users') ? 'active' : '' ?>">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
-            </a>
-        </li>
-        
-        <li>
-            <a href="<?= APP_URL ?>/admin/services" class="sidebar-link <?= ($currentPage === 'services') ? 'active' : '' ?>">
+            <a href="<?= APP_URL ?>/provider/services" class="sidebar-link <?= ($currentPage === 'services') ? 'active' : '' ?>">
                 <i class="fas fa-tools"></i>
-                <span>Services</span>
+                <span>My Services</span>
             </a>
         </li>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/categories" class="sidebar-link <?= ($currentPage === 'categories') ? 'active' : '' ?>">
-                <i class="fas fa-th-large"></i>
-                <span>Categories</span>
-            </a>
-        </li>
-        
-        <li>
-            <a href="<?= APP_URL ?>/admin/bookings" class="sidebar-link <?= ($currentPage === 'bookings') ? 'active' : '' ?>">
+            <a href="<?= APP_URL ?>/provider/bookings" class="sidebar-link <?= ($currentPage === 'bookings') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-check"></i>
                 <span>Bookings</span>
             </a>
         </li>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/payments" class="sidebar-link <?= ($currentPage === 'payments') ? 'active' : '' ?>">
-                <i class="fas fa-credit-card"></i>
-                <span>Payments</span>
+            <a href="<?= APP_URL ?>/provider/calendar" class="sidebar-link <?= ($currentPage === 'calendar') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendar</span>
             </a>
         </li>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/reviews" class="sidebar-link <?= ($currentPage === 'reviews') ? 'active' : '' ?>">
+            <a href="<?= APP_URL ?>/provider/schedule" class="sidebar-link <?= ($currentPage === 'schedule') ? 'active' : '' ?>">
+                <i class="fas fa-clock"></i>
+                <span>Availability</span>
+            </a>
+        </li>
+        
+        <li>
+            <a href="<?= APP_URL ?>/provider/reviews" class="sidebar-link <?= ($currentPage === 'reviews') ? 'active' : '' ?>">
                 <i class="fas fa-star"></i>
                 <span>Reviews</span>
+            </a>
+        </li>
+        
+        <li>
+            <a href="<?= APP_URL ?>/provider/earnings" class="sidebar-link <?= ($currentPage === 'earnings') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Earnings</span>
             </a>
         </li>
         
         <div class="sidebar-divider"></div>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/settings" class="sidebar-link <?= ($currentPage === 'settings') ? 'active' : '' ?>">
+            <a href="<?= APP_URL ?>/provider/profile" class="sidebar-link <?= ($currentPage === 'profile') ? 'active' : '' ?>">
+                <i class="fas fa-user-cog"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+        
+        <li>
+            <a href="<?= APP_URL ?>/provider/settings" class="sidebar-link <?= ($currentPage === 'settings') ? 'active' : '' ?>">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
         </li>
         
         <li>
-            <a href="<?= APP_URL ?>/admin/logs" class="sidebar-link <?= ($currentPage === 'logs') ? 'active' : '' ?>">
-                <i class="fas fa-history"></i>
-                <span>Logs</span>
+            <a href="<?= APP_URL ?>/auth/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </a>
         </li>
     </ul>
@@ -191,11 +198,17 @@ console.log('Current Page:', '<?= $currentPage ?>');
 
 document.addEventListener('DOMContentLoaded', function() {
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.querySelector('.admin-sidebar');
+    const sidebar = document.querySelector('.provider-sidebar');
     
     if (sidebarToggle) {
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('show');
+            if (window.innerWidth <= 768) {
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.style.marginLeft = sidebar.classList.contains('show') ? '250px' : '0';
+                }
+            }
         });
     }
 

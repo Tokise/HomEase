@@ -1,16 +1,16 @@
 # Enable the rewrite engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /HomEase/
+    RewriteBase /HomeSwift/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # If the request is for an existing file or directory in public, serve it directly
-    RewriteCond %{REQUEST_URI} ^/HomEase/public/
-    RewriteCond %{DOCUMENT_ROOT}/HomEase%{REQUEST_URI} -f [OR]
-    RewriteCond %{DOCUMENT_ROOT}/HomEase%{REQUEST_URI} -d
+    RewriteCond %{REQUEST_URI} ^/HomeSwift/public/
+    RewriteCond %{DOCUMENT_ROOT}/HomeSwift%{REQUEST_URI} -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/HomeSwift%{REQUEST_URI} -d
     RewriteRule ^ - [L]
 
     # If the request is for an existing file or directory in root, serve it directly
@@ -18,11 +18,49 @@
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Handle Google handler directly
+    # Handle root URL and forward to home controller
+    RewriteRule ^$ public/index.php?controller=home&action=index [L,QSA]
+    RewriteRule ^/$ public/index.php?controller=home&action=index [L,QSA]
+
+    # Handle auth routes
+    RewriteRule ^auth/process-register$ public/index.php?controller=auth&action=processRegister [L,QSA]
+    RewriteRule ^auth/process-login$ public/index.php?controller=auth&action=processLogin [L,QSA]
     RewriteRule ^auth/google-handler$ public/auth/google-handler.php [QSA,L]
 
     # Handle all other requests through index.php
-    RewriteRule ^$ public/index.php [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ public/index.php [L,QSA]
+
+    # Prevent direct access to src directory
+    RewriteCond %{REQUEST_URI} ^/HomeSwift/src/
+    RewriteRule ^ - [F,L]
+
+    # Prevent direct access to config directory
+    RewriteCond %{REQUEST_URI} ^/HomeSwift/config/
+    RewriteRule ^ - [F,L]
+
+    # Prevent direct access to database directory
+    RewriteCond %{REQUEST_URI} ^/HomeSwift/database/
+    RewriteRule ^ - [F,L]
+
+    # Prevent direct access to vendor directory
+    RewriteCond %{REQUEST_URI} ^/HomeSwift/vendor/
+    RewriteRule ^ - [F,L]
+
+    # Prevent direct access to .env file
+    RewriteCond %{REQUEST_URI} ^\.env$
+    RewriteRule ^ - [F,L]
+
+    # Allow direct access to setup.php
+    <Files "setup.php">
+        Order Allow,Deny
+        Allow from all
+    </Files>
+
+    # Handle front controller
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/index.php [QSA,L]
 </IfModule>
 
@@ -37,9 +75,9 @@ php_value error_reporting E_ALL
 Options -Indexes
 
 # Set default error pages
-ErrorDocument 404 /HomEase/public/index.php?controller=error&action=notFound
-ErrorDocument 403 /HomEase/public/index.php?controller=error&action=forbidden
-ErrorDocument 500 /HomEase/public/index.php?controller=error&action=serverError
+ErrorDocument 404 /HomeSwift/public/index.php?controller=error&action=notFound
+ErrorDocument 403 /HomeSwift/public/index.php?controller=error&action=forbidden
+ErrorDocument 500 /HomeSwift/public/index.php?controller=error&action=serverError
 
 # Enable gzip compression
 <IfModule mod_deflate.c>

@@ -5,56 +5,271 @@
  */
 
 $title = "Bookings";
-include '../layouts/provider-header.php';
+include SRC_PATH . '/views/layouts/provider-header.php';
 ?>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= APP_URL ?>/provider/dashboard">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?= APP_URL ?>/provider/bookings">
-                            <i class="fas fa-calendar-check me-2"></i>
-                            Bookings
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= APP_URL ?>/provider/services">
-                            <i class="fas fa-tools me-2"></i>
-                            My Services
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= APP_URL ?>/provider/reviews">
-                            <i class="fas fa-star me-2"></i>
-                            Reviews
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= APP_URL ?>/provider/earnings">
-                            <i class="fas fa-money-bill-wave me-2"></i>
-                            Earnings
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= APP_URL ?>/provider/profile">
-                            <i class="fas fa-user-cog me-2"></i>
-                            Profile Settings
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+<style>
+.container-fluid {
+    padding: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+/* Card Styles */
+.card {
+    background: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e3e6f0;
+    background: #fff;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Tab Navigation */
+.nav-tabs {
+    border-bottom: none;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #4e73df;
+    background: rgba(78, 115, 223, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    color: #4e73df;
+    background: rgba(78, 115, 223, 0.1);
+    border-bottom: 2px solid #4e73df;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.badge.bg-warning { background-color: #f6c23e !important; }
+.badge.bg-primary { background-color: #4e73df !important; }
+.badge.bg-success { background-color: #1cc88a !important; }
+.badge.bg-danger { background-color: #e74a3b !important; }
+.badge.bg-secondary { background-color: #858796 !important; }
+
+/* Search and Filter Section */
+.search-filter {
+    padding: 1.25rem;
+    background: #f8f9fc;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.input-group .form-control {
+    border: 1px solid #e3e6f0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+.input-group .btn {
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+}
+
+.form-select {
+    border: 1px solid #e3e6f0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    background-color: #fff;
+}
+
+/* Table Styles */
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.booking-table {
+    margin: 0;
+    width: 100%;
+}
+
+.booking-table thead th {
+    background: #f8f9fc;
+    color: #4e73df;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid #e3e6f0;
+}
+
+.booking-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.booking-table tbody tr {
+    transition: all 0.2s;
+}
+
+.booking-table tbody tr:hover {
+    background: #f8f9fc;
+}
+
+/* Client Photo Styles */
+.client-photo {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.client-photo-placeholder {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #f8f9fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #858796;
+}
+
+/* Button Styles */
+.btn-group {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.btn-group .btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-primary {
+    color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-outline-primary:hover {
+    background: #4e73df;
+    color: #fff;
+}
+
+/* Empty State Styles */
+.empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #dddfeb;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #858796;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Today's Schedule Section */
+.today-schedule {
+    margin-top: 2rem;
+}
+
+.today-schedule .card-header {
+    background: linear-gradient(45deg, #4e73df, #3867d6);
+    color: #fff;
+}
+
+.today-schedule .card-header h6 {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .search-filter .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+    }
+    
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 0.375rem;
+    }
+    
+    .booking-table {
+        min-width: 800px;
+    }
+}
+</style>
 
         <!-- Main Content -->
+<div class="container-fluid">
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Manage Bookings</h1>
@@ -289,7 +504,7 @@ include '../layouts/provider-header.php';
         </main>
     </div>
 </div>
-
+</div>
 <!-- Booking Table Template -->
 <?php 
 function renderBookingTable($bookings) { 
@@ -437,5 +652,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include '../layouts/provider-footer.php'; ?>
+<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?>
  

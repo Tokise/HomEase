@@ -17,7 +17,7 @@ if (strpos($uri, '/services') !== false) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="app-url" content="<?= APP_URL ?>">
-    <title><?= $title ?? 'HomEase - Home Services Platform' ?></title>
+    <title><?= $title ?? 'HomeSwift - Home Services Platform' ?></title>
     
     <!-- Favicon -->
     <link rel="icon" href="<?= APP_URL ?>/assets/img/favicon.ico" type="image/x-icon">
@@ -50,7 +50,7 @@ if (strpos($uri, '/services') !== false) {
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomEase" height="40">
+                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" height="40">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -79,7 +79,7 @@ if (strpos($uri, '/services') !== false) {
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <?php if ($_SESSION['user_role'] == ROLE_ADMIN): ?>
                                     <li><a class="dropdown-item" href="<?= APP_URL ?>/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>
-                                <?php elseif ($_SESSION['user_role'] == ROLE_SERVICE_PROVIDER): ?>
+                                <?php elseif ($_SESSION['user_role'] == ROLE_PROVIDER): ?>
                                     <li><a class="dropdown-item" href="<?= APP_URL ?>/provider/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Provider Dashboard</a></li>
                                 <?php else: ?>
                                     <li><a class="dropdown-item" href="<?= APP_URL ?>/client/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>

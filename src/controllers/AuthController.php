@@ -23,7 +23,7 @@ class AuthController extends Controller {
         }
         
         $this->render('auth/login', [
-            'title' => 'Login | HomEase',
+            'title' => 'Login | HomeSwift',
             'styles' => ['auth']
         ]);
     }
@@ -57,21 +57,25 @@ class AuthController extends Controller {
         try {
             $user = $this->userModel->findByEmail($email);
             
-            // Add additional debugging for password verification
-            if ($user) {
-                error_log("Found user with email: $email (ID: {$user['id']})");
-                error_log("Stored password hash: " . $user['password']);
-                error_log("Password hash length: " . strlen($user['password']));
-                $verified = password_verify($password, $user['password']);
-                error_log("Password verification result: " . ($verified ? 'SUCCESS' : 'FAILED'));
-            } else {
-                error_log("No user found with email: $email");
+            if (!$user) {
+                $this->renderJson([
+                    'success' => false,
+                    'message' => 'Invalid email or password.'
+                ]);
+                return;
+            }
+
+            // Check if this is a Google Sign-In user
+            if ($user['google_id'] && !$user['password']) {
+                $this->renderJson([
+                    'success' => false,
+                    'message' => 'This account uses Google Sign-In. Please login with Google.'
+                ]);
+                return;
             }
             
-            if (!$user || !password_verify($password, $user['password'])) {
-                if (DEBUG_MODE) {
-                    error_log("Login failed for email: $email");
-                }
+            // Verify password for non-Google users
+            if (!$user['password'] || !password_verify($password, $user['password'])) {
                 $this->renderJson([
                     'success' => false,
                     'message' => 'Invalid email or password.'
@@ -83,7 +87,7 @@ class AuthController extends Controller {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role_id']; // Store numeric role
+            $_SESSION['user_role'] = $user['role_id'];
             $_SESSION['auth_type'] = 'manual';
             
             // Set remember me cookie if requested
@@ -99,11 +103,6 @@ class AuthController extends Controller {
             // Get redirect URL based on role
             $redirectUrl = $this->getRedirectUrlByRole($user['role_id']);
             
-            if (DEBUG_MODE) {
-                error_log("Login successful for user ID: " . $user['id']);
-                error_log("Redirecting to: " . $redirectUrl);
-            }
-            
             $this->renderJson([
                 'success' => true,
                 'message' => 'Welcome back, ' . $user['first_name'] . '!',
@@ -111,9 +110,7 @@ class AuthController extends Controller {
             ]);
             
         } catch (Exception $e) {
-            if (DEBUG_MODE) {
-                error_log("Login error: " . $e->getMessage());
-            }
+            error_log("Login error: " . $e->getMessage());
             $this->renderJson([
                 'success' => false,
                 'message' => 'An error occurred during login. Please try again.'
@@ -132,7 +129,7 @@ class AuthController extends Controller {
         }
         
         $this->render('auth/register', [
-            'title' => 'Register | HomEase',
+            'title' => 'Register | HomeSwift',
             'styles' => ['auth']
         ]);
     }
@@ -150,6 +147,15 @@ class AuthController extends Controller {
             ]);
             return;
         }
+
+        // Check if it's an AJAX request
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
+            $this->renderJson([
+                'success' => false,
+                'message' => 'Invalid request type'
+            ]);
+            return;
+        }
         
         // Get form data
         $firstName = trim($_POST['first_name'] ?? '');
@@ -159,98 +165,112 @@ class AuthController extends Controller {
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
         
-        // Basic validation
+        // Detailed validation
         $errors = [];
         
         if (empty($firstName)) {
             $errors[] = 'First name is required';
+        } elseif (strlen($firstName) > 50) {
+            $errors[] = 'First name cannot exceed 50 characters';
         }
         
         if (empty($lastName)) {
             $errors[] = 'Last name is required';
+        } elseif (strlen($lastName) > 50) {
+            $errors[] = 'Last name cannot exceed 50 characters';
         }
         
         if (empty($email)) {
             $errors[] = 'Email is required';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Invalid email format';
+        } elseif (strlen($email) > 100) {
+            $errors[] = 'Email cannot exceed 100 characters';
+        }
+
+        if (!empty($phone) && !preg_match('/^[0-9+\-\(\)\s]{10,20}$/', $phone)) {
+            $errors[] = 'Invalid phone number format';
         }
         
         if (empty($password)) {
             $errors[] = 'Password is required';
         } elseif (strlen($password) < 8) {
             $errors[] = 'Password must be at least 8 characters long';
+        } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+            $errors[] = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
         }
         
         if ($password !== $confirmPassword) {
             $errors[] = 'Passwords do not match';
         }
         
-        // Check if email already exists
-        $existingUser = $this->userModel->findByEmail($email);
-        if ($existingUser) {
-            $this->renderJson([
-                'success' => false,
-                'message' => 'Email already in use. Please log in or use a different email address.'
-            ]);
-            return;
-        }
-        
-        // If there are validation errors
-        if (!empty($errors)) {
-            $this->renderJson([
-                'success' => false,
-                'message' => implode('<br>', $errors)
-            ]);
-            return;
-        }
-        
-        // Hash password
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        // Create user data array
-        $userData = [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'email' => $email,
-            'phone_number' => $phone,
-            'password' => $hashedPassword,
-            'role_id' => ROLE_CLIENT, // Default role for new users
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        // Create user and get ID
-        if (DEBUG_MODE) {
-            error_log("Attempting to create new user via registration: " . json_encode($userData));
-        }
-        
-        $userId = $this->userModel->create($userData);
-        
-        if ($userId) {
-            if (DEBUG_MODE) {
-                error_log("User created successfully with ID: " . $userId);
+        try {
+            // Check if email already exists
+            $existingUser = $this->userModel->findByEmail($email);
+            if ($existingUser) {
+                $this->renderJson([
+                    'success' => false,
+                    'message' => 'Email already in use. Please log in or use a different email address.'
+                ]);
+                return;
             }
             
-            // Set session variables
-            $_SESSION['user_id'] = $userId;
-            $_SESSION['user_name'] = $firstName . ' ' . $lastName;
-            $_SESSION['user_email'] = $email;
-            $_SESSION['user_role'] = ROLE_CLIENT; // Use numeric role ID constant
-            $_SESSION['auth_type'] = 'manual';
-            
-            $this->renderJson([
-                'success' => true,
-                'message' => 'Welcome to HomEase, ' . $firstName . '!',
-                'redirect' => APP_URL . '/client/dashboard'
-            ]);
-        } else {
-            if (DEBUG_MODE) {
-                error_log("Failed to create user");
+            // If there are validation errors
+            if (!empty($errors)) {
+                $this->renderJson([
+                    'success' => false,
+                    'message' => implode('<br>', $errors)
+                ]);
+                return;
             }
+            
+            // Hash password with strong options
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
+            
+            // Create user data array
+            $userData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'phone_number' => $phone,
+                'password' => $hashedPassword,
+                'role_id' => ROLE_CLIENT,
+                'is_active' => 1,
+                'email_verified' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            // Create user and get ID
+            $userId = $this->userModel->create($userData);
+            
+            if ($userId) {
+                // Set session variables
+                $_SESSION['user_id'] = $userId;
+                $_SESSION['user_name'] = $firstName . ' ' . $lastName;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['user_role'] = ROLE_CLIENT;
+                $_SESSION['auth_type'] = 'manual';
+                
+                $this->renderJson([
+                    'success' => true,
+                    'message' => 'Welcome to HomeSwift, ' . $firstName . '! Your account has been created successfully.',
+                    'redirect' => APP_URL . '/client/dashboard'
+                ]);
+            } else {
+                error_log("Failed to create user in database");
+                $this->renderJson([
+                    'success' => false,
+                    'message' => 'Failed to create account. Please try again later.'
+                ]);
+            }
+        } catch (Exception $e) {
+            error_log("Registration error: " . $e->getMessage());
             $this->renderJson([
                 'success' => false,
-                'message' => 'Failed to create account. Please try again.'
+                'message' => DEBUG_MODE ? 
+                    'Error: ' . $e->getMessage() : 
+                    'An error occurred during registration. Please try again later.'
             ]);
         }
     }
@@ -286,7 +306,7 @@ class AuthController extends Controller {
         switch ($roleId) {
             case ROLE_ADMIN:
                 return 'Administrator';
-            case ROLE_SERVICE_PROVIDER:
+            case ROLE_PROVIDER:
                 return 'Service Provider';
             case ROLE_CLIENT:
                 return 'Client';
@@ -302,7 +322,7 @@ class AuthController extends Controller {
         switch ($roleId) {
             case ROLE_ADMIN:
                 return APP_URL . '/admin/dashboard';
-            case ROLE_SERVICE_PROVIDER:
+            case ROLE_PROVIDER:
                 return APP_URL . '/provider/dashboard';
             case ROLE_CLIENT:
             default:

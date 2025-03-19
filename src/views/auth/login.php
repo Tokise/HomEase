@@ -3,9 +3,9 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomEase" class="auth-logo">
+            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" class="auth-logo">
             <h1 class="auth-title">Welcome Back</h1>
-            <p class="auth-subtitle">Sign in to your HomEase account</p>
+            <p class="auth-subtitle">Sign in to your HomeSwift account</p>
         </div>
         
         <?php if (isset($_SESSION['flash_message'])): ?>
@@ -67,7 +67,8 @@
                 data-theme="outline"
                 data-text="sign_in_with"
                 data-shape="rectangular"
-                data-logo_alignment="left">
+                data-logo_alignment="left"
+                data-width="100%">
             </div>
         </div>
         
@@ -172,7 +173,7 @@ function handleCredentialResponse(response) {
     })
     .then(data => {
         if (data.success) {
-            // Redirect directly without showing message
+            // Redirect immediately to dashboard
             window.location.href = data.redirect;
         } else {
             throw new Error(data.message || 'Failed to sign in with Google');

@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    <h5>HomEase</h5>
+                    <h5>HomeSwift</h5>
                     <p class="mb-3">Your one-stop platform for all home services. Quality work, guaranteed satisfaction.</p>
                     <div class="social-icons">
                         <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
@@ -37,14 +37,14 @@
                     <address class="text-white-50">
                         <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Service Street, City</p>
                         <p class="mb-2"><i class="fas fa-phone-alt me-2"></i> (123) 456-7890</p>
-                        <p class="mb-2"><i class="fas fa-envelope me-2"></i> info@homeease.com</p>
+                        <p class="mb-2"><i class="fas fa-envelope me-2"></i> info@homeswift.com</p>
                     </address>
                 </div>
             </div>
             <hr class="mt-4 mb-4 bg-secondary">
             <div class="row">
                 <div class="col-md-6 mb-3 mb-md-0">
-                    <p class="mb-0">&copy; <?= date('Y') ?> HomEase. All rights reserved.</p>
+                    <p class="mb-0">&copy; <?= date('Y') ?> HomeSwift. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="<?= APP_URL ?>/privacy-policy" class="text-decoration-none text-white-50 me-3">Privacy Policy</a>

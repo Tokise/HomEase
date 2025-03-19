@@ -3,9 +3,9 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomEase" class="auth-logo">
+            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" class="auth-logo">
             <h1 class="auth-title">Create an Account</h1>
-            <p class="auth-subtitle">Join HomEase and start finding reliable home services</p>
+            <p class="auth-subtitle">Join HomeSwift and start finding reliable home services</p>
         </div>
         
         <?php if (isset($_SESSION['flash_message'])): ?>
@@ -166,35 +166,52 @@ document.addEventListener('DOMContentLoaded', function() {
     signupForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Basic validation
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm_password').value;
-        
-        if (password !== confirmPassword) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Passwords do not match!'
-            });
-            return;
-        }
-        
-        if (!document.getElementById('terms').checked) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Please accept the Terms of Service and Privacy Policy'
-            });
-            return;
-        }
-        
         try {
+            const formData = new FormData(this);
+            
+            // Basic validation
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Mismatch',
+                    text: 'Passwords do not match!'
+                });
+                return;
+            }
+            
+            if (!document.getElementById('terms').checked) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terms Not Accepted',
+                    text: 'Please accept the Terms of Service and Privacy Policy'
+                });
+                return;
+            }
+
+            // Disable form submission button and show loading state
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            
             const response = await fetch(this.action, {
                 method: 'POST',
-                body: new FormData(this)
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
             
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                throw new Error('Server response was not JSON');
+            }
             
             if (data.success) {
                 await Swal.fire({
@@ -208,16 +225,24 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Oops...',
-                    text: data.message || 'Something went wrong!'
+                    title: 'Registration Failed',
+                    text: data.message || 'Something went wrong during registration. Please try again.'
                 });
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
             }
         } catch (error) {
+            console.error('Registration error:', error);
             Swal.fire({
                 icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!'
+                title: 'System Error',
+                text: 'A system error occurred during registration. Please try again later.'
             });
+            // Re-enable submit button
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Create Account';
         }
     });
 });

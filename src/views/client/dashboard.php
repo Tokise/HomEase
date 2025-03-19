@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title) ?> | HomEase</title>
+    <title><?= htmlspecialchars($title) ?> | HomeSwift</title>
     
     <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,19 +19,26 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomEase" height="40">
+                    <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" height="40">
             </a>
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle text-dark" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="profile-avatar-wrapper">
                             <?php if (!empty($user['google_picture'])): ?>
-                                <img src="<?= htmlspecialchars($user['google_picture']) ?>" alt="Profile" class="user-avatar">
+                                <img src="<?= htmlspecialchars($user['google_picture']) ?>" 
+                                     alt="Profile" 
+                                     class="user-avatar"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.src='<?= APP_URL ?>/assets/images/default-avatar.png'">
                             <?php elseif (!empty($user['profile_picture'])): ?>
-                                <img src="<?= APP_URL ?>/<?= $user['profile_picture'] ?>" alt="Profile" class="user-avatar">
+                                <img src="<?= APP_URL . '/' . ltrim($user['profile_picture'], '/') ?>" 
+                                     alt="Profile" 
+                                     class="user-avatar"
+                                     onerror="this.src='<?= APP_URL ?>/assets/images/default-avatar.png'">
                             <?php else: ?>
                                 <div class="user-avatar-placeholder">
-                                    <i class="fas fa-user"></i>
+                                    <?= strtoupper(substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1)) ?>
                                 </div>
                             <?php endif; ?>
                             <?php if (!empty($user['google_id'])): ?>
