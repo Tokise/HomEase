@@ -8,12 +8,13 @@ $title = "Dashboard";
 include SRC_PATH . '/views/layouts/provider-header.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid px-4">  <!-- Changed from container-fluid to container-fluid px-4 -->
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Provider Dashboard</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <!-- Removed border-bottom class -->
+                <h1 class="h2 mb-0">Provider Dashboard</h1>  <!-- Added mb-0 -->
+                <div class="btn-toolbar mb-0">  <!-- Changed mb-2 mb-md-0 to mb-0 -->
                     <button type="button" class="btn btn-sm btn-primary" onclick="window.location.href='<?= APP_URL ?>/provider/services/add'">
                         <i class="fas fa-plus"></i> Add New Service
                     </button>
@@ -23,8 +24,8 @@ include SRC_PATH . '/views/layouts/provider-header.php';
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+    <div class="row g-3 mb-4">  <!-- Added g-3 for better gap control -->
+        <div class="col-md-3">  <!-- Removed mb-3 class -->
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -40,7 +41,7 @@ include SRC_PATH . '/views/layouts/provider-header.php';
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
+        <div class="col-md-3">  <!-- Removed mb-3 class -->
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -56,7 +57,7 @@ include SRC_PATH . '/views/layouts/provider-header.php';
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
+        <div class="col-md-3">  <!-- Removed mb-3 class -->
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -79,7 +80,7 @@ include SRC_PATH . '/views/layouts/provider-header.php';
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
+        <div class="col-md-3">  <!-- Removed mb-3 class -->
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -125,7 +126,7 @@ include SRC_PATH . '/views/layouts/provider-header.php';
                         <tbody>
                             <?php foreach ($upcomingBookings as $booking): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($booking['client_name']) ?></td>
+                                    <td><?= htmlspecialchars($booking['client_first_name'] . ' ' . $booking['client_last_name']) ?></td>
                                     <td><?= htmlspecialchars($booking['service_name']) ?></td>
                                     <td><?= date('M d, Y', strtotime($booking['booking_date'])) ?></td>
                                     <td><?= date('h:i A', strtotime($booking['start_time'])) ?></td>
@@ -223,6 +224,42 @@ include SRC_PATH . '/views/layouts/provider-header.php';
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Add custom styles at the bottom of the file -->
+    <style>
+        /* Custom padding and margin adjustments */
+        .container-fluid {
+            max-width: 1600px;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table td, .table th {
+            padding: 0.75rem 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
 </div>
 
-<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?> 
+<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?>

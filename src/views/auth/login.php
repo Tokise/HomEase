@@ -2,11 +2,6 @@
 
 <div class="auth-container">
     <div class="auth-card">
-        <div class="auth-header">
-            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" class="auth-logo">
-            <h1 class="auth-title">Welcome Back</h1>
-            <p class="auth-subtitle">Sign in to your HomeSwift account</p>
-        </div>
         
         <?php if (isset($_SESSION['flash_message'])): ?>
             <div class="alert alert-<?= $_SESSION['flash_type'] ?? 'info' ?>">
@@ -73,7 +68,10 @@
         </div>
         
         <div class="auth-footer">
-            <p>Don't have an account? <a href="<?= APP_URL ?>/auth/register">Create Account</a></p>
+            <div class="create-account-section">
+                <span>New to HomeSwift?</span>
+                <a href="<?= APP_URL ?>/auth/register" class="btn btn-link">Create Account</a>
+            </div>
         </div>
     </div>
 </div>
@@ -193,9 +191,6 @@ function handleCredentialResponse(response) {
 <style>
 .auth-container {
     min-height: calc(100vh - 80px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 2rem;
     background-color: #f8f9fa;
 }
@@ -204,14 +199,72 @@ function handleCredentialResponse(response) {
     background: #fff;
     border-radius: 15px;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    padding: 2rem;
+    padding: 1.5rem;
     width: 100%;
-    max-width: 450px;
+    max-width: 400px; /* Reduced width for vertical layout */
+    margin: 0 auto;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon .form-control {
+    padding-right: 2.5rem; /* Make space for the eye icon */
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 24px; /* Fixed width */
+    height: 24px; /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+/* Adjust form elements to span full width */
+.form-options, 
+.form-group:last-child, 
+.auth-divider,
+.google-signin-container,
+.auth-footer {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .auth-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .auth-card {
+        max-width: 400px;
+    }
 }
 
 .auth-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .auth-logo {
@@ -220,19 +273,20 @@ function handleCredentialResponse(response) {
 }
 
 .auth-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .auth-subtitle {
+    font-size: 0.9rem;
     color: #6c757d;
     margin-bottom: 0;
 }
 
 .auth-form .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-label {
@@ -257,7 +311,7 @@ function handleCredentialResponse(response) {
     padding-left: 2.75rem;
     border-radius: 8px;
     border: 1px solid #e3e6f0;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
 }
 
 .input-icon .form-control:focus {
@@ -359,13 +413,32 @@ function handleCredentialResponse(response) {
     text-decoration: underline;
 }
 
+.create-account-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.btn-link {
+    padding: 0;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 576px) {
     .auth-container {
-        padding: 1rem;
+        padding: 0.5rem;
     }
     
     .auth-card {
-        padding: 1.5rem;
+        padding: 1rem;
     }
     
     .form-options {
@@ -376,4 +449,3 @@ function handleCredentialResponse(response) {
 }
 </style>
 
-<?php require_once SRC_PATH . '/views/layouts/footer.php'; ?> 

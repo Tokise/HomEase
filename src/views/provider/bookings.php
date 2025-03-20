@@ -9,15 +9,35 @@ include SRC_PATH . '/views/layouts/provider-header.php';
 ?>
 
 <style>
+/* Update container spacing */
 .container-fluid {
-    padding: 1.5rem;
-    max-width: 1600px;
-    margin: 0 auto;
+    padding: 1rem;
+ 
+    
 }
 
-/* Page Header */
-.page-header {
+/* Adjust main content position */
+.main-content {
+    margin-left: 140px;
+    margin-top: -30px;
+}
+
+/* Update card max-width */
+.card {
+    max-width: 1400px;
+    margin-left: 0;
+    background: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
     margin-bottom: 1.5rem;
+}
+
+/* Adjust page header */
+.page-header {
+    margin-left: 0;
+    padding-left: 0;
+    margin-bottom: 1rem;
     padding: 1rem;
     background: #fff;
     border-radius: 0.5rem;
@@ -31,101 +51,17 @@ include SRC_PATH . '/views/layouts/provider-header.php';
     font-weight: 600;
 }
 
-/* Card Styles */
-.card {
-    background: #fff;
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
-    margin-bottom: 1.5rem;
+/* Update layout for better space usage */
+.col-md-9.ms-sm-auto.col-lg-10.px-md-4 {
+    margin-left: 0 !important;
+    padding-left: 1rem !important;
+    max-width: 100%;
+    flex: 0 0 100%;
 }
 
-.card-header {
-    padding: 1.25rem;
-    border-bottom: 1px solid #e3e6f0;
-    background: #fff;
-    border-radius: 0.5rem 0.5rem 0 0;
-}
-
-.card-body {
-    padding: 1.25rem;
-}
-
-/* Tab Navigation */
-.nav-tabs {
-    border-bottom: none;
-    gap: 0.5rem;
-    padding: 0 0.5rem;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    color: #6c757d;
-    padding: 0.75rem 1.25rem;
-    font-weight: 500;
-    border-radius: 0.375rem;
-    transition: all 0.2s;
-}
-
-.nav-tabs .nav-link:hover {
-    color: #4e73df;
-    background: rgba(78, 115, 223, 0.1);
-}
-
-.nav-tabs .nav-link.active {
-    color: #4e73df;
-    background: rgba(78, 115, 223, 0.1);
-    border-bottom: 2px solid #4e73df;
-}
-
-/* Badge Styles */
-.badge {
-    padding: 0.5rem 0.75rem;
-    font-weight: 500;
-    border-radius: 0.375rem;
-}
-
-.badge.bg-warning { background-color: #f6c23e !important; }
-.badge.bg-primary { background-color: #4e73df !important; }
-.badge.bg-success { background-color: #1cc88a !important; }
-.badge.bg-danger { background-color: #e74a3b !important; }
-.badge.bg-secondary { background-color: #858796 !important; }
-
-/* Search and Filter Section */
-.search-filter {
-    padding: 1.25rem;
-    background: #f8f9fc;
-    border-radius: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.input-group {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.input-group .form-control {
-    border: 1px solid #e3e6f0;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-}
-
-.input-group .btn {
-    padding: 0.75rem 1.25rem;
-    font-weight: 500;
-}
-
-.form-select {
-    border: 1px solid #e3e6f0;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    background-color: #fff;
-}
-
-/* Table Styles */
+/* Improve table responsiveness */
 .table-responsive {
+    margin-left: 0;
     border-radius: 0.5rem;
     overflow: hidden;
 }
@@ -157,24 +93,95 @@ include SRC_PATH . '/views/layouts/provider-header.php';
     background: #f8f9fc;
 }
 
-/* Client Photo Styles */
-.client-photo {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    object-fit: cover;
+/* Adjust search and filter section */
+.search-filter {
+    margin-left: 0;
+    background: #fff;
+    border: 1px solid #e3e6f0;
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
-.client-photo-placeholder {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: #f8f9fc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #858796;
+.input-group {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
+
+.input-group .form-control {
+    border: 1px solid #e3e6f0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+.input-group .btn {
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+}
+
+.form-select {
+    border: 1px solid #e3e6f0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    background-color: #fff;
+}
+
+/* Improve tab navigation spacing */
+.nav-tabs {
+    margin-left: 0;
+    padding-left: 0;
+    border-bottom: none;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #4e73df;
+    background: rgba(78, 115, 223, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    color: #4e73df;
+    background: rgba(78, 115, 223, 0.1);
+    border-bottom: 2px solid #4e73df;
+}
+
+/* Update card header for better alignment */
+.card-header {
+    padding-left: 1rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid #e3e6f0;
+    background: #fff;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.badge.bg-warning { background-color: #f6c23e !important; }
+.badge.bg-primary { background-color: #4e73df !important; }
+.badge.bg-success { background-color: #1cc88a !important; }
+.badge.bg-danger { background-color: #e74a3b !important; }
+.badge.bg-secondary { background-color: #858796 !important; }
 
 /* Button Styles */
 .btn-group {
@@ -268,243 +275,243 @@ include SRC_PATH . '/views/layouts/provider-header.php';
 }
 </style>
 
-        <!-- Main Content -->
-<div class="container-fluid">
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Manage Bookings</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <a href="<?= APP_URL ?>/provider/calendar" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-calendar-alt"></i> View Calendar
-                        </a>
+<!-- Main Content -->
+<div class="container-fluid p-0">
+    <main class="main-content">
+        <!-- Update header spacing -->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+            <h1 class="h2">Manage Bookings</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <a href="<?= APP_URL ?>/provider/calendar" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-calendar-alt"></i> View Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Status Tabs -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <ul class="nav nav-tabs card-header-tabs" id="bookingTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" 
+                                type="button" role="tab" aria-controls="all" aria-selected="true">
+                            All Bookings <span class="badge bg-secondary ms-1"><?= count($bookings ?? []) ?></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" 
+                                type="button" role="tab" aria-controls="pending" aria-selected="false">
+                            Pending <span class="badge bg-warning text-dark ms-1"><?= $pending_count ?? 0 ?></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed" 
+                                type="button" role="tab" aria-controls="confirmed" aria-selected="false">
+                            Confirmed <span class="badge bg-primary ms-1"><?= $confirmed_count ?? 0 ?></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
+                                type="button" role="tab" aria-controls="completed" aria-selected="false">
+                            Completed <span class="badge bg-success ms-1"><?= $completed_count ?? 0 ?></span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" 
+                                type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+                            Cancelled <span class="badge bg-danger ms-1"><?= $cancelled_count ?? 0 ?></span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchBooking" 
+                                   placeholder="Search by client name or service...">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select" id="serviceFilter">
+                                    <option value="">All Services</option>
+                                    <?php if (!empty($services)): ?>
+                                        <?php foreach ($services as $service): ?>
+                                            <option value="<?= $service['id'] ?>"><?= htmlspecialchars($service['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="date" class="form-control" id="dateFilter">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="bookingTabContent">
+                    <!-- All Bookings Tab -->
+                    <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                        <?php if (empty($bookings)): ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-calendar-check fa-3x text-gray-300 mb-3"></i>
+                                <p class="text-muted mb-0">No bookings found.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php $this->renderBookingTable($bookings); ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Pending Bookings Tab -->
+                    <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                        <?php 
+                        $pending_bookings = array_filter($bookings ?? [], function($booking) {
+                            return $booking['status'] == 'pending';
+                        });
+                        if (empty($pending_bookings)): 
+                        ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-clock fa-3x text-gray-300 mb-3"></i>
+                                <p class="text-muted mb-0">No pending bookings.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php $this->renderBookingTable($pending_bookings); ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Confirmed Bookings Tab -->
+                    <div class="tab-pane fade" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
+                        <?php 
+                        $confirmed_bookings = array_filter($bookings ?? [], function($booking) {
+                            return $booking['status'] == 'confirmed';
+                        });
+                        if (empty($confirmed_bookings)): 
+                        ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-circle fa-3x text-gray-300 mb-3"></i>
+                                <p class="text-muted mb-0">No confirmed bookings.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php $this->renderBookingTable($confirmed_bookings); ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Completed Bookings Tab -->
+                    <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                        <?php 
+                        $completed_bookings = array_filter($bookings ?? [], function($booking) {
+                            return $booking['status'] == 'completed';
+                        });
+                        if (empty($completed_bookings)): 
+                        ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-double fa-3x text-gray-300 mb-3"></i>
+                                <p class="text-muted mb-0">No completed bookings.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php $this->renderBookingTable($completed_bookings); ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Cancelled Bookings Tab -->
+                    <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+                        <?php 
+                        $cancelled_bookings = array_filter($bookings ?? [], function($booking) {
+                            return $booking['status'] == 'cancelled';
+                        });
+                        if (empty($cancelled_bookings)): 
+                        ?>
+                            <div class="text-center py-5">
+                                <i class="fas fa-times-circle fa-3x text-gray-300 mb-3"></i>
+                                <p class="text-muted mb-0">No cancelled bookings.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php $this->renderBookingTable($cancelled_bookings); ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Booking Status Tabs -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <ul class="nav nav-tabs card-header-tabs" id="bookingTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" 
-                                    type="button" role="tab" aria-controls="all" aria-selected="true">
-                                All Bookings <span class="badge bg-secondary ms-1"><?= count($bookings ?? []) ?></span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" 
-                                    type="button" role="tab" aria-controls="pending" aria-selected="false">
-                                Pending <span class="badge bg-warning text-dark ms-1"><?= $pending_count ?? 0 ?></span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed" 
-                                    type="button" role="tab" aria-controls="confirmed" aria-selected="false">
-                                Confirmed <span class="badge bg-primary ms-1"><?= $confirmed_count ?? 0 ?></span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
-                                    type="button" role="tab" aria-controls="completed" aria-selected="false">
-                                Completed <span class="badge bg-success ms-1"><?= $completed_count ?? 0 ?></span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" 
-                                    type="button" role="tab" aria-controls="cancelled" aria-selected="false">
-                                Cancelled <span class="badge bg-danger ms-1"><?= $cancelled_count ?? 0 ?></span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="card-body">
-                    <!-- Search and Filter -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchBooking" 
-                                       placeholder="Search by client name or service...">
-                                <button class="btn btn-outline-primary" type="button">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <select class="form-select" id="serviceFilter">
-                                        <option value="">All Services</option>
-                                        <?php if (!empty($services)): ?>
-                                            <?php foreach ($services as $service): ?>
-                                                <option value="<?= $service['id'] ?>"><?= htmlspecialchars($service['name']) ?></option>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="date" class="form-control" id="dateFilter">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-content" id="bookingTabContent">
-                        <!-- All Bookings Tab -->
-                        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-                            <?php if (empty($bookings)): ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-calendar-check fa-3x text-gray-300 mb-3"></i>
-                                    <p class="text-muted mb-0">No bookings found.</p>
-                                </div>
-                            <?php else: ?>
-                                <?php $this->renderBookingTable($bookings); ?>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Pending Bookings Tab -->
-                        <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
-                            <?php 
-                            $pending_bookings = array_filter($bookings ?? [], function($booking) {
-                                return $booking['status'] == 'pending';
-                            });
-                            if (empty($pending_bookings)): 
-                            ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-clock fa-3x text-gray-300 mb-3"></i>
-                                    <p class="text-muted mb-0">No pending bookings.</p>
-                                </div>
-                            <?php else: ?>
-                                <?php $this->renderBookingTable($pending_bookings); ?>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Confirmed Bookings Tab -->
-                        <div class="tab-pane fade" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
-                            <?php 
-                            $confirmed_bookings = array_filter($bookings ?? [], function($booking) {
-                                return $booking['status'] == 'confirmed';
-                            });
-                            if (empty($confirmed_bookings)): 
-                            ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-check-circle fa-3x text-gray-300 mb-3"></i>
-                                    <p class="text-muted mb-0">No confirmed bookings.</p>
-                                </div>
-                            <?php else: ?>
-                                <?php $this->renderBookingTable($confirmed_bookings); ?>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Completed Bookings Tab -->
-                        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
-                            <?php 
-                            $completed_bookings = array_filter($bookings ?? [], function($booking) {
-                                return $booking['status'] == 'completed';
-                            });
-                            if (empty($completed_bookings)): 
-                            ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-check-double fa-3x text-gray-300 mb-3"></i>
-                                    <p class="text-muted mb-0">No completed bookings.</p>
-                                </div>
-                            <?php else: ?>
-                                <?php $this->renderBookingTable($completed_bookings); ?>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Cancelled Bookings Tab -->
-                        <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
-                            <?php 
-                            $cancelled_bookings = array_filter($bookings ?? [], function($booking) {
-                                return $booking['status'] == 'cancelled';
-                            });
-                            if (empty($cancelled_bookings)): 
-                            ?>
-                                <div class="text-center py-5">
-                                    <i class="fas fa-times-circle fa-3x text-gray-300 mb-3"></i>
-                                    <p class="text-muted mb-0">No cancelled bookings.</p>
-                                </div>
-                            <?php else: ?>
-                                <?php $this->renderBookingTable($cancelled_bookings); ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
+        <!-- Upcoming Schedule -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Today's Schedule</h6>
+                <a href="<?= APP_URL ?>/provider/calendar" class="btn btn-sm btn-primary">Full Calendar</a>
             </div>
-
-            <!-- Upcoming Schedule -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Today's Schedule</h6>
-                    <a href="<?= APP_URL ?>/provider/calendar" class="btn btn-sm btn-primary">Full Calendar</a>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($todays_bookings)): ?>
-                        <div class="text-center py-4">
-                            <p class="text-muted mb-0">No bookings scheduled for today.</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+            <div class="card-body">
+                <?php if (empty($todays_bookings)): ?>
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">No bookings scheduled for today.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($todays_bookings as $booking): ?>
                                     <tr>
-                                        <th>Time</th>
-                                        <th>Client</th>
-                                        <th>Service</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($todays_bookings as $booking): ?>
-                                        <tr>
-                                            <td><?= date('h:i A', strtotime($booking['booking_time'])) ?></td>
-                                            <td><?= htmlspecialchars($booking['client_name']) ?></td>
-                                            <td><?= htmlspecialchars($booking['service_name']) ?></td>
-                                            <td>
+                                        <td><?= date('h:i A', strtotime($booking['booking_time'])) ?></td>
+                                        <td><?= htmlspecialchars($booking['client_name']) ?></td>
+                                        <td><?= htmlspecialchars($booking['service_name']) ?></td>
+                                        <td>
+                                            <?php if ($booking['status'] == 'pending'): ?>
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                            <?php elseif ($booking['status'] == 'confirmed'): ?>
+                                                <span class="badge bg-primary">Confirmed</span>
+                                            <?php elseif ($booking['status'] == 'completed'): ?>
+                                                <span class="badge bg-success">Completed</span>
+                                            <?php elseif ($booking['status'] == 'cancelled'): ?>
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="<?= APP_URL ?>/provider/bookings/view/<?= $booking['id'] ?>" 
+                                                   class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                                 <?php if ($booking['status'] == 'pending'): ?>
-                                                    <span class="badge bg-warning text-dark">Pending</span>
-                                                <?php elseif ($booking['status'] == 'confirmed'): ?>
-                                                    <span class="badge bg-primary">Confirmed</span>
-                                                <?php elseif ($booking['status'] == 'completed'): ?>
-                                                    <span class="badge bg-success">Completed</span>
-                                                <?php elseif ($booking['status'] == 'cancelled'): ?>
-                                                    <span class="badge bg-danger">Cancelled</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group">
-                                                    <a href="<?= APP_URL ?>/provider/bookings/view/<?= $booking['id'] ?>" 
-                                                       class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View Details">
-                                                        <i class="fas fa-eye"></i>
+                                                    <a href="<?= APP_URL ?>/provider/bookings/confirm/<?= $booking['id'] ?>" 
+                                                       class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Confirm">
+                                                        <i class="fas fa-check"></i>
                                                     </a>
-                                                    <?php if ($booking['status'] == 'pending'): ?>
-                                                        <a href="<?= APP_URL ?>/provider/bookings/confirm/<?= $booking['id'] ?>" 
-                                                           class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Confirm">
-                                                            <i class="fas fa-check"></i>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                    <?php if ($booking['status'] == 'confirmed'): ?>
-                                                        <a href="<?= APP_URL ?>/provider/bookings/complete/<?= $booking['id'] ?>" 
-                                                           class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Mark Completed">
-                                                            <i class="fas fa-check-double"></i>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                                                <?php endif; ?>
+                                                <?php if ($booking['status'] == 'confirmed'): ?>
+                                                    <a href="<?= APP_URL ?>/provider/bookings/complete/<?= $booking['id'] ?>" 
+                                                       class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Mark Completed">
+                                                        <i class="fas fa-check-double"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 </div>
-</div>
+
 <!-- Booking Table Template -->
 <?php 
 function renderBookingTable($bookings) { 
@@ -572,14 +579,20 @@ function renderBookingTable($bookings) {
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if ($booking['status'] == 'pending'): ?>
-                                    <a href="<?= APP_URL ?>/provider/bookings/confirm/<?= $booking['id'] ?>" 
-                                       class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Confirm">
+                                    <a href="#" 
+                                       class="btn btn-sm btn-success btn-confirm-booking" ['id'] ?>" data-bs-toggle="tooltip" title="Confirm">
+                                       data-id="<?= $booking['id'] ?>"
+                                       data-bs-toggle="tooltip" 
+                                       title="Confirm">
                                         <i class="fas fa-check"></i>
                                     </a>
-                                <?php endif; ?>
+                                <?php endif; ?> ?>" data-bs-toggle="tooltip" title="Mark Completed">
                                 <?php if ($booking['status'] == 'confirmed'): ?>
-                                    <a href="<?= APP_URL ?>/provider/bookings/complete/<?= $booking['id'] ?>" 
-                                       class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Mark Completed">
+                                    <a href="#" 
+                                       class="btn btn-sm btn-primary btn-complete-booking" 
+                                       data-id="<?= $booking['id'] ?>"
+                                       data-bs-toggle="tooltip" 
+                                       title="Mark Completed">
                                         <i class="fas fa-check-double"></i>
                                     </a>
                                 <?php endif; ?>
@@ -645,12 +658,64 @@ document.addEventListener('DOMContentLoaded', function() {
                     showRow = rowDate === date;
                 }
                 
-                row.style.display = showRow ? '' : 'none';
+                row.style.display = showRow ? '' : 'none';// Add event listeners for booking actions
             });
+        });    // Handle confirm booking
+
+
+
+
+
+
+<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?></script>});    }    document.querySelectorAll('.btn-confirm-booking').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bookingId = this.dataset.id;
+            confirmBooking(bookingId);
         });
-    }
+    });
+
+    // Handle complete booking
+    document.querySelectorAll('.btn-complete-booking').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bookingId = this.dataset.id;
+            completeBooking(bookingId);
+        });
+    });
 });
+
+function confirmBooking(bookingId) {
+    updateBookingStatus(bookingId, 'confirm');
+}
+
+function completeBooking(bookingId) {
+    updateBookingStatus(bookingId, 'complete');
+}
+
+function updateBookingStatus(bookingId, action) {
+    fetch(`${APP_URL}/provider/bookings/${action}/${bookingId}`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            alert(data.message);
+            // Reload the page to show updated status
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the booking status');
+    });
+}
 </script>
 
 <?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?>
- 

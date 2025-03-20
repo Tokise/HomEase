@@ -11,16 +11,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="<?= APP_URL ?>/assets/css/dashboard.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/variables.css">
+    <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/client.css">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="<?= APP_URL ?>">
-                    <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" height="40">
-            </a>
+            HomeSwift
             <div class="d-flex align-items-center">
                 <div class="dropdown">
                     <button class="btn btn-link dropdown-toggle text-dark" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
@@ -132,7 +130,7 @@
                                                 <td><?= htmlspecialchars($booking['service_name']) ?></td>
                                                 <td><?= date('M d, Y', strtotime($booking['booking_date'])) ?></td>
                                                 <td><?= date('h:i A', strtotime($booking['start_time'])) ?></td>
-                                                <td><?= htmlspecialchars($booking['provider_name']) ?></td>
+                                                <td><?= htmlspecialchars($booking['provider_name'] ?? $booking['business_name'] ?? 'N/A') ?></td>
                                                 <td><span class="badge bg-<?= $this->getBookingStatusClass($booking['status']) ?>"><?= ucfirst($booking['status']) ?></span></td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -237,268 +235,72 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Available Services -->
+        <div class="row mt-4 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-concierge-bell me-2"></i>Available Services</h5>
+                        <div>
+                            <select class="form-select form-select-sm" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= $category['id'] ?>"><?= htmlspecialchars($category['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="servicesContainer">
+                            <?php foreach ($activeServices as $service): ?>
+                                <div class="col-md-4 mb-4" data-category="<?= $service['category_id'] ?>">
+                                    <div class="service-card">
+                                        <?php if (!empty($service['image'])): ?>
+                                            <img src="<?= APP_URL ?>/<?= $service['image'] ?>" class="card-img-top" alt="<?= htmlspecialchars($service['name']) ?>">
+                                        <?php endif; ?>
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?= htmlspecialchars($service['name']) ?></h5>
+                                            <p class="card-text"><?= htmlspecialchars(substr($service['description'], 0, 100)) ?>...</p>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <span class="badge bg-info"><?= htmlspecialchars($service['category_name']) ?></span>
+                                                <span class="text-primary fw-bold">$<?= number_format($service['price'], 2) ?></span>
+                                            </div>
+                                            <a href="<?= APP_URL ?>/booking/book/<?= $service['id'] ?>" class="btn btn-primary w-100">
+                                                <i class="fas fa-calendar-plus me-1"></i> Book Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Category filter functionality
+            document.getElementById('categoryFilter').addEventListener('change', function() {
+                const selectedCategory = this.value;
+                const services = document.querySelectorAll('#servicesContainer > div');
+                
+                services.forEach(service => {
+                    if (!selectedCategory || service.dataset.category === selectedCategory) {
+                        service.style.display = 'block';
+                    } else {
+                        service.style.display = 'none';
+                    }
+                });
+            });
+        </script>
+
+    </div> <!-- Close container -->
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<style>
-:root {
-    --primary-color: #4e73df;
-    --text-primary: #333;
-    --text-secondary: #6c757d;
-    --bg-light: #f8f9fc;
-    --border-color: #e3e6f0;
-}
-
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-primary);
-}
-
-.navbar {
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    padding: 0.75rem 0;
-}
-
-.navbar-brand img {
-    height: 40px;
-    width: auto;
-}
-
-.dropdown-toggle {
-    font-weight: 500;
-    text-decoration: none;
-}
-
-.dropdown-toggle::after {
-    margin-left: 0.5rem;
-}
-
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-radius: 10px;
-    padding: 0.5rem;
-}
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 500;
-}
-
-.dropdown-item:hover {
-    background-color: var(--bg-light);
-}
-
-.dropdown-divider {
-    margin: 0.5rem 0;
-}
-
-.welcome-title {
-    font-weight: 600;
-    margin-bottom: 5px;
-    font-size: 2rem;
-}
-
-.stats-container {
-    margin-bottom: 25px;
-}
-
-.stat-card {
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-}
-
-.stat-icon {
-    font-size: 2.5rem;
-    margin-right: 15px;
-    color: var(--primary-color);
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(78, 115, 223, 0.1);
-    border-radius: 50%;
-}
-
-.stat-info h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--primary-color);
-}
-
-.stat-info p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.card {
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    border-radius: 15px;
-    overflow: hidden;
-}
-
-.card-header {
-    background-color: var(--bg-light);
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
-}
-
-.card-header h5 {
-    font-weight: 600;
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.booking-table th {
-    font-weight: 600;
-    border-top: none;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.booking-table td {
-    font-size: 0.95rem;
-    vertical-align: middle;
-}
-
-.service-card {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: transform 0.3s, box-shadow 0.3s;
-    height: 100%;
-}
-
-.service-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-}
-
-.service-img {
-    height: 160px;
-    overflow: hidden;
-}
-
-.service-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.service-info {
-    padding: 1.25rem;
-    background: #fff;
-}
-
-.service-info h4 {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.service-category {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-    font-weight: 500;
-}
-
-.btn {
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.875rem;
-}
-
-.alert {
-    border-radius: 10px;
-    font-weight: 500;
-}
-
-.badge {
-    font-weight: 500;
-    padding: 0.5em 0.75em;
-    border-radius: 6px;
-}
-
-.user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.profile-avatar-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.user-avatar-placeholder {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 16px;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.google-badge {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: #fff;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: #4285F4;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.dropdown-toggle {
-    font-weight: 500;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-}
-</style>
 
 <?php
 // Helper function for booking status badge class
@@ -520,4 +322,4 @@ function getBookingStatusClass($status) {
 }
 ?>
 
-<?php /* Footer is already included by the Controller */ ?> 
+<?php /* Footer is already included by the Controller */ ?>

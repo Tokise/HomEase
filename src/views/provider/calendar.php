@@ -251,15 +251,15 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 <style>
 /* Layout Styles */
 .container-fluid {
-    padding: 1.5rem;
-    max-width: 1600px;
+    padding: 2rem;
+    max-width: 1800px;
     margin: 0 auto;
 }
 
 /* Page Header Styles */
 .page-title-box {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
     background: #fff;
     border-radius: 0.5rem;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
@@ -288,11 +288,11 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
     border: none;
     border-radius: 0.5rem;
     box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .card-header {
-    padding: 1.25rem;
+    padding: 1.5rem;
     border-bottom: 1px solid #e3e6f0;
     background: #fff;
     border-radius: 0.5rem 0.5rem 0 0;
@@ -303,7 +303,7 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 }
 
 .card-body {
-    padding: 1.25rem;
+    padding: 1.5rem;
 }
 
 /* Calendar Navigation */
@@ -342,8 +342,8 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 }
 
 .calendar-day {
-    height: 140px;
-    padding: 0.75rem;
+    height: 160px;
+    padding: 1rem;
     vertical-align: top;
     border: 1px solid #e3e6f0;
     background: #fff;
@@ -382,7 +382,7 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 
 /* Event Styles */
 .calendar-events {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     max-height: 90px;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -404,8 +404,8 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 
 .calendar-event {
     display: block;
-    padding: 0.375rem 0.75rem;
-    margin-bottom: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
     border-radius: 0.25rem;
     font-size: 0.75rem;
     color: #fff;
@@ -430,8 +430,8 @@ $firstDayOfMonth = date('N', strtotime($year . '-' . $month . '-01'));
 .bg-secondary { background-color: #858796 !important; }
 
 /* Daily Schedule Section */
-.daily-schedule {
-    margin-top: 2rem;
+.mt-4 {
+    margin-top: 2rem !important;
 }
 
 .table-responsive {
@@ -518,4 +518,4 @@ function getStatusBadgeClass($status) {
             return 'secondary';
     }
 }
-?> 
+?>

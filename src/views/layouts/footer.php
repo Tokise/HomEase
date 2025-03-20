@@ -1,11 +1,11 @@
-    </main>
+</main>
 
     <!-- Footer Section -->
     <footer class="bg-dark text-white pt-5 pb-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    <h5>HomeSwift</h5>
+                    <img src="<?= APP_URL ?>/assets/img/logoo.svg" alt="HomeSwift" style="height: 150px; width: auto; margin: 10px 0;">
                     <p class="mb-3">Your one-stop platform for all home services. Quality work, guaranteed satisfaction.</p>
                     <div class="social-icons">
                         <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
@@ -63,4 +63,4 @@
         <?php endforeach; ?>
     <?php endif; ?>
 </body>
-</html> 
+</html>

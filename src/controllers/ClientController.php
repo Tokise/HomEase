@@ -7,11 +7,13 @@ require_once SRC_PATH . '/controllers/Controller.php';
 require_once SRC_PATH . '/models/User.php';
 require_once SRC_PATH . '/models/Service.php';
 require_once SRC_PATH . '/models/Booking.php';
+require_once SRC_PATH . '/models/ServiceCategory.php'; // Add this line
 
 class ClientController extends Controller {
     private $userModel;
     private $serviceModel;
     private $bookingModel;
+    private $categoryModel; // Add this line
 
     /**
      * Constructor
@@ -21,30 +23,30 @@ class ClientController extends Controller {
         $this->userModel = new User();
         $this->serviceModel = new Service();
         $this->bookingModel = new Booking();
+        $this->categoryModel = new ServiceCategory(); // Add this line
     }
 
     /**
      * Display client dashboard
      */
     public function dashboard() {
-        // Require client authentication
         $this->requireRole(ROLE_CLIENT);
 
-        // Get user data
         $user = $this->getCurrentUser();
         
-        // Get user's bookings and featured services
+        // Get bookings and services data
         $upcomingBookings = $this->bookingModel->getUpcomingBookings($user['id']);
         $recentBookings = $this->bookingModel->getRecentBookings($user['id']);
-        $featuredServices = $this->serviceModel->getFeatured(4);
+        $activeServices = $this->serviceModel->getActive(); // Added this line
+        $categories = $this->categoryModel->getAll(); // Added this line
 
-        // Render dashboard view
         $this->render('client/dashboard', [
             'title' => 'Dashboard',
             'user' => $user,
             'upcomingBookings' => $upcomingBookings,
             'recentBookings' => $recentBookings,
-            'featuredServices' => $featuredServices,
+            'activeServices' => $activeServices, // Added this line
+            'categories' => $categories, // Added this line
             'styles' => ['dashboard']
         ]);
     }
@@ -375,4 +377,4 @@ class ClientController extends Controller {
 
         $this->redirect(APP_URL . '/client/profile');
     }
-} 
+}

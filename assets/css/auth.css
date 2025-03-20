@@ -14,17 +14,20 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: var(--spacing-lg) 0;
-    background: linear-gradient(135deg, rgba(78, 125, 241, 0.1), rgba(53, 99, 216, 0.05));
+    padding: 2rem;
+    background: var(--gradient-primary);
+    margin-top: 100px;
 }
 
 .auth-card {
     width: 100%;
     max-width: 480px;
-    padding: var(--spacing-xl);
-    background-color: var(--color-white);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
 .auth-header {
@@ -38,15 +41,18 @@ body {
 }
 
 .auth-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--color-gray-900);
-    margin-bottom: var(--spacing-xs);
+    color: #ffffff;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .auth-subtitle {
     font-size: 1rem;
-    color: var(--color-gray-600);
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
 }
 
 .auth-social {
@@ -82,6 +88,7 @@ body {
     position: relative;
     text-align: center;
     margin: var(--spacing-lg) 0;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .auth-divider::before {
@@ -91,7 +98,7 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background-color: var(--color-gray-300);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .auth-divider span {
@@ -121,7 +128,8 @@ body {
     display: block;
     margin-bottom: var(--spacing-xs);
     font-weight: 500;
-    color: var(--color-gray-700);
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.5px;
 }
 
 .form-control {
@@ -157,11 +165,25 @@ body {
 .input-icon i {
     position: absolute;
     left: var(--spacing-md);
-    color: var(--color-gray-500);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .input-icon .form-control {
     padding-left: calc(var(--spacing-md) * 2 + 1rem);
+    background: rgba(255, 255, 255, 0.95); /* Updated for better visibility */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #333; /* Changed to dark color for better readability */
+}
+
+.input-icon .form-control:focus {
+    background: #ffffff; /* Solid white background on focus */
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    color: #333; /* Ensure text stays dark on focus */
+}
+
+.input-icon .form-control::placeholder {
+    color: #666; /* Darker placeholder text */
 }
 
 .password-toggle {
@@ -169,7 +191,7 @@ body {
     right: var(--spacing-md);
     background: none;
     border: none;
-    color: var(--color-gray-500);
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     padding: 0;
 }
@@ -245,7 +267,7 @@ body {
 
 .form-check-label {
     font-size: 0.875rem;
-    color: var(--color-gray-700);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .form-check-label a {
@@ -265,15 +287,21 @@ body {
 .auth-footer {
     text-align: center;
     font-size: 0.875rem;
-    color: var(--color-gray-600);
-    border-top: 1px solid var(--color-gray-200);
+    color: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin-top: var(--spacing-lg);
     padding-top: var(--spacing-lg);
 }
 
+.auth-footer span {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
 .auth-footer a {
     color: var(--color-primary);
-    font-weight: 500;
+    font-weight: 600;
+    text-decoration: none;
 }
 
 .alert {
@@ -281,6 +309,9 @@ body {
     margin-bottom: var(--spacing-md);
     border: 1px solid transparent;
     border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
 }
 
 .alert-info {
@@ -325,4 +356,17 @@ body {
     .auth-title {
         font-size: 1.5rem;
     }
-} 
+}
+
+.google-signin-container {
+    margin: 1.5rem 0;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

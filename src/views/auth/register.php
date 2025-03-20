@@ -2,11 +2,7 @@
 
 <div class="auth-container">
     <div class="auth-card">
-        <div class="auth-header">
-            <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" class="auth-logo">
-            <h1 class="auth-title">Create an Account</h1>
-            <p class="auth-subtitle">Join HomeSwift and start finding reliable home services</p>
-        </div>
+     
         
         <?php if (isset($_SESSION['flash_message'])): ?>
             <div class="alert alert-<?= $_SESSION['flash_type'] ?? 'info' ?>">
@@ -16,21 +12,19 @@
         <?php endif; ?>
         
         <form id="signupForm" action="<?= APP_URL ?>/auth/process-register" method="post" class="auth-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <div class="input-icon">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="first_name" name="first_name" class="form-control" required placeholder="First name">
-                    </div>
+            <div class="form-group">
+                <label for="first_name" class="form-label">First Name</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="first_name" name="first_name" class="form-control" required placeholder="First name">
                 </div>
-                
-                <div class="form-group">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <div class="input-icon">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="last_name" name="last_name" class="form-control" required placeholder="Last name">
-                    </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name" class="form-label">Last Name</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="last_name" name="last_name" class="form-control" required placeholder="Last name">
                 </div>
             </div>
             
@@ -88,7 +82,10 @@
         </form>
         
         <div class="auth-footer">
-            <p>Already have an account? <a href="<?= APP_URL ?>/auth/login">Sign In</a></p>
+            <div class="create-account-section">
+                <span>Already have an account?</span>
+                <a href="<?= APP_URL ?>/auth/login" class="btn btn-link">Sign In</a>
+            </div>
         </div>
     </div>
 </div>
@@ -251,9 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .auth-container {
     min-height: calc(100vh - 80px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 2rem;
     background-color: #f8f9fa;
 }
@@ -264,45 +258,34 @@ document.addEventListener('DOMContentLoaded', function() {
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
     padding: 2rem;
     width: 100%;
-    max-width: 550px;
+    max-width: 600px; /* Reduced from 800px */
+    margin: 0 auto;
 }
 
-.auth-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.auth-logo {
-    height: 50px;
-    margin-bottom: 1.5rem;
-}
-
-.auth-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-    color: #6c757d;
-    margin-bottom: 0;
-}
-
-.auth-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-row {
+.auth-form {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 }
 
+/* Elements that should span full width */
+.form-group:nth-child(n+5), /* Starting from password field */
+.form-check, 
+.form-group:last-child,
+.auth-footer {
+    grid-column: 1 / -1;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
 .form-label {
-    font-weight: 500;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #344767;
     margin-bottom: 0.5rem;
-    color: #333;
 }
 
 .input-icon {
@@ -311,115 +294,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .input-icon i {
     position: absolute;
-    left: 1rem;
+    left: 10px;
     top: 50%;
     transform: translateY(-50%);
     color: #6c757d;
 }
 
 .input-icon .form-control {
-    padding-left: 2.75rem;
-    border-radius: 8px;
-    border: 1px solid #e3e6f0;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    width: 100%;
+    height: 42px;
+    padding-left: 35px;
+    font-size: 0.875rem;
 }
 
-.input-icon .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+@media (max-width: 768px) {
+    .auth-card {
+        max-width: 400px;
+        padding: 1.5rem;
+    }
+    
+    .auth-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group {
+        grid-column: 1;
+    }
 }
 
+/* Remove any custom padding/margin from password toggle */
 .password-toggle {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #6c757d;
-    cursor: pointer;
-    padding: 0;
+    right: 10px;
+    width: auto;
+    height: auto;
 }
 
+/* Adjust password strength meter */
 .password-strength {
     margin-top: 0.5rem;
 }
 
 .strength-meter {
-    height: 4px;
-    background-color: #e3e6f0;
-    border-radius: 2px;
-    margin-bottom: 0.5rem;
-}
-
-.strength-meter-fill {
-    height: 100%;
-    width: 0;
-    background-color: #ff4444;
-    border-radius: 2px;
-    transition: width 0.3s ease, background-color 0.3s ease;
+    height: 3px;
+    margin-bottom: 0.25rem;
 }
 
 .strength-text {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6c757d;
-}
-
-.form-check {
-    margin-top: 1rem;
-}
-
-.form-check-label {
-    color: #6c757d;
-    cursor: pointer;
-}
-
-.form-check-label a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.form-check-label a:hover {
-    text-decoration: underline;
-}
-
-.btn-block {
-    width: 100%;
-    padding: 0.75rem;
-    font-weight: 500;
-    font-size: 1rem;
-}
-
-.auth-footer {
-    text-align: center;
-    color: #6c757d;
-    margin-top: 1.5rem;
-}
-
-.auth-footer a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-
-@media (max-width: 576px) {
-    .auth-container {
-        padding: 1rem;
-    }
-    
-    .auth-card {
-        padding: 1.5rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
 }
 </style>
 
-<?php require_once SRC_PATH . '/views/layouts/footer.php'; ?>
+
 

@@ -8,10 +8,10 @@ $title = "My Services";
 include SRC_PATH . '/views/layouts/provider-header.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid py-4 px-4">
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3 mb-4 border-bottom">
                 <h1 class="h2">My Services</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <a href="<?= APP_URL ?>/provider/services/add" class="btn btn-sm btn-primary">
@@ -24,10 +24,10 @@ include SRC_PATH . '/views/layouts/provider-header.php';
 
     <!-- Services List -->
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header py-3 px-4">
             <h6 class="mb-0 font-weight-bold">Your Listed Services</h6>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <?php if (empty($services)): ?>
                 <div class="text-center py-5">
                     <i class="fas fa-tools fa-4x text-gray-300 mb-4"></i>
@@ -126,11 +126,11 @@ include SRC_PATH . '/views/layouts/provider-header.php';
     <!-- Service Analytics -->
     <?php if (!empty($services)): ?>
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header py-3 px-4">
                 <h6 class="mb-0 font-weight-bold">Service Performance</h6>
             </div>
-            <div class="card-body">
-                <div class="row">
+            <div class="card-body p-4">
+                <div class="row g-4">
                     <div class="col-md-6">
                         <h5 class="small font-weight-bold">Most Booked Services</h5>
                         <div class="chart-container" style="position: relative; height:250px;">
@@ -245,4 +245,38 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <?php endif; ?>
 
-<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?> 
+<?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?>
+
+<style>
+/* Add these styles at the end of your file */
+.table > :not(caption) > * > * {
+    padding: 1rem;
+}
+
+
+.btn-group {
+    gap: 0.5rem;
+}
+
+.chart-container {
+    margin-top: 1.5rem;
+}
+
+.card {
+    margin-bottom: 2rem;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+.img-thumbnail {
+    margin-right: 1rem;
+}
+
+.h2{
+    margin-left: 1rem;
+}
+
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+}
+</style>

@@ -539,8 +539,8 @@ class Booking extends Model {
     public function getUpcomingBookings($userId, $limit = 5) {
         $sql = "SELECT b.*, 
                 s.name as service_name,
-                p.first_name as provider_first_name,
-                p.last_name as provider_last_name
+                CONCAT(p.first_name, ' ', p.last_name) as provider_name,
+                p.business_name
                 FROM {$this->table} b
                 JOIN services s ON b.service_id = s.id
                 JOIN users p ON b.provider_id = p.id
@@ -658,11 +658,12 @@ class Booking extends Model {
         try {
             $query = "SELECT b.*, s.name as service_name,
                             u.first_name as client_first_name,
-                            u.last_name as client_last_name
+                            u.last_name as client_last_name,
+                            CONCAT(u.first_name, ' ', u.last_name) as client_name
                      FROM {$this->table} b
                      JOIN services s ON b.service_id = s.id
                      JOIN users u ON b.client_id = u.id
-                     WHERE s.provider_id = :provider_id
+                     WHERE b.provider_id = :provider_id
                      AND b.booking_date >= CURDATE()
                      AND b.status = 'pending'
                      ORDER BY b.booking_date ASC, b.start_time ASC";
@@ -829,13 +830,15 @@ class Booking extends Model {
      */
     public function getProviderRecentBookings($providerId, $limit = 5) {
         try {
-            $query = "SELECT b.*, s.name as service_name,
-                            u.first_name as client_first_name,
-                            u.last_name as client_last_name
+            $query = "SELECT b.*, 
+                     s.name as service_name,
+                     CONCAT(u.first_name, ' ', u.last_name) as client_name,
+                     u.first_name as client_first_name,
+                     u.last_name as client_last_name
                      FROM {$this->table} b
                      JOIN services s ON b.service_id = s.id
                      JOIN users u ON b.client_id = u.id
-                     WHERE s.provider_id = :provider_id
+                     WHERE b.provider_id = :provider_id
                      ORDER BY b.created_at DESC
                      LIMIT :limit";
             
@@ -891,15 +894,26 @@ class Booking extends Model {
      * @return array Array of bookings with service and user details
      */
     public function getProviderBookings($providerId) {
-        $sql = "SELECT b.*, s.name as service_name, u.first_name, u.last_name 
-                FROM bookings b 
+        $sql = "SELECT b.*, 
+                s.name as service_name, 
+                CONCAT(u.first_name, ' ', u.last_name) as client_name,
+                u.first_name as client_first_name,
+                u.last_name as client_last_name,
+                b.total_price
+                FROM {$this->table} b 
                 JOIN services s ON b.service_id = s.id 
                 JOIN users u ON b.client_id = u.id 
-                WHERE s.provider_id = :provider_id 
+                WHERE b.provider_id = :provider_id 
                 ORDER BY b.booking_date DESC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute(['provider_id' => $providerId]);
-        return $stmt->fetchAll();
+                
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['provider_id' => $providerId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting provider bookings: " . $e->getMessage());
+            return [];
+        }
     }
 
      /**
@@ -916,4 +930,7 @@ class Booking extends Model {
             return 0;
         }
     }
+
+   
+
 }

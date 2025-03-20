@@ -10,6 +10,9 @@ if (strpos($uri, '/services') !== false) {
 } elseif (strpos($uri, '/contact') !== false) {
     $currentPage = 'contact';
 }
+
+// Check if current page is auth page
+$isAuthPage = strpos($_SERVER['REQUEST_URI'], '/auth/') !== false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,10 +50,10 @@ if (strpos($uri, '/services') !== false) {
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg ">
         <div class="container">
             <a class="navbar-brand" href="<?= APP_URL ?>">
-                <img src="<?= APP_URL ?>/assets/img/logo.png" alt="HomeSwift" height="40">
+                <img src="<?= APP_URL ?>/assets/img/logoo.svg" alt="HomeSwift" style="height: 100px; width: auto; margin: 10px 0;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -70,30 +73,32 @@ if (strpos($uri, '/services') !== false) {
                         <a class="nav-link" href="<?= APP_URL ?>/contact">Contact</a>
                     </li>
                 </ul>
-                <div class="d-flex">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <?php if ($_SESSION['user_role'] == ROLE_ADMIN): ?>
-                                    <li><a class="dropdown-item" href="<?= APP_URL ?>/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>
-                                <?php elseif ($_SESSION['user_role'] == ROLE_PROVIDER): ?>
-                                    <li><a class="dropdown-item" href="<?= APP_URL ?>/provider/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Provider Dashboard</a></li>
-                                <?php else: ?>
-                                    <li><a class="dropdown-item" href="<?= APP_URL ?>/client/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                                <?php endif; ?>
-                                <li><a class="dropdown-item" href="<?= APP_URL ?>/client/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="<?= APP_URL ?>/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                            </ul>
-                        </div>
-                    <?php else: ?>
-                        <a href="<?= APP_URL ?>/auth/login" class="btn btn-outline-primary me-2">Login</a>
-                        <a href="<?= APP_URL ?>/auth/register" class="btn btn-primary">Register</a>
-                    <?php endif; ?>
-                </div>
+                <?php if (!$isAuthPage): ?>
+                    <div class="d-flex" id="authButtons">
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <?php if ($_SESSION['user_role'] == ROLE_ADMIN): ?>
+                                        <li><a class="dropdown-item" href="<?= APP_URL ?>/admin/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>
+                                    <?php elseif ($_SESSION['user_role'] == ROLE_PROVIDER): ?>
+                                        <li><a class="dropdown-item" href="<?= APP_URL ?>/provider/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Provider Dashboard</a></li>
+                                    <?php else: ?>
+                                        <li><a class="dropdown-item" href="<?= APP_URL ?>/client/dashboard"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                    <?php endif; ?>
+                                    <li><a class="dropdown-item" href="<?= APP_URL ?>/client/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="<?= APP_URL ?>/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        <?php else: ?>
+                            <a href="<?= APP_URL ?>/auth/login" class="btn btn-outline-primary me-2" id="loginBtn">Login</a>
+                            <a href="<?= APP_URL ?>/auth/register" class="btn btn-primary" id="registerBtn">Register</a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </nav>
@@ -201,5 +206,19 @@ if (strpos($uri, '/services') !== false) {
                 link.classList.add('active');
             }
         });
+
+        // Add scroll event handler for navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
     });
-</script> 
+</script>
+
+</main>
+</body>
+</html>

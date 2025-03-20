@@ -197,6 +197,61 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+/* Adjust these styles in your existing style block */
+.container-fluid {
+    padding: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.card {
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.form-control, .form-select {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.table td, .table th {
+    padding: 1rem 1.25rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+}
+
+.alert {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+}
+
+.page-title-box {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+}
+
+.form-label {
+    margin-bottom: 0.75rem;
+}
+
+/* Weekly Schedule Table */
+.table-responsive {
+    margin-top: 1rem;
+}
+
+.table-bordered td, .table-bordered th {
+    padding: 1rem;
+}
+
 /* Schedule Form Styles */
 .form-control, .form-select {
     border: 1px solid #e3e6f0;
@@ -369,4 +424,4 @@ input[type="time"]:focus {
 .page-title-right {
     margin-top: 8px;
 }
-</style> 
+</style>

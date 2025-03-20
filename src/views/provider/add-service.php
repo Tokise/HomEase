@@ -117,3 +117,15 @@ include SRC_PATH . '/views/layouts/provider-header.php';
 </div>
 
 <?php include SRC_PATH . '/views/layouts/provider-footer.php'; ?> 
+
+<style>
+
+.container-fluid{
+    margin-left: 1rem;
+    padding: 1rem;
+}
+
+.h2{
+    margin-left: 1rem;
+}
+</style>

@@ -224,6 +224,68 @@ class ServiceProviderController extends Controller {
     }
 
     /**
+     * Confirm booking
+     */
+    public function confirmBooking($bookingId) {
+        $this->requireRole(ROLE_PROVIDER);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
+            if ($this->bookingModel->updateStatus($bookingId, 'confirmed')) {
+                $response = [
+                    'success' => true,
+                    'message' => 'Booking confirmed successfully'
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'message' => 'Failed to confirm booking'
+                ];
+            }
+            
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode($response);
+                exit;
+            }
+            
+            $_SESSION['flash_message'] = $response['message'];
+            $_SESSION['flash_type'] = $response['success'] ? 'success' : 'danger';
+            $this->redirect(APP_URL . '/provider/bookings');
+        }
+    }
+
+    /**
+     * Complete booking
+     */
+    public function completeBooking($bookingId) {
+        $this->requireRole(ROLE_PROVIDER);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
+            if ($this->bookingModel->updateStatus($bookingId, 'completed')) {
+                $response = [
+                    'success' => true,
+                    'message' => 'Booking marked as completed'
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'message' => 'Failed to complete booking'
+                ];
+            }
+            
+            if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+                header('Content-Type: application/json');
+                echo json_encode($response);
+                exit;
+            }
+            
+            $_SESSION['flash_message'] = $response['message'];
+            $_SESSION['flash_type'] = $response['success'] ? 'success' : 'danger';
+            $this->redirect(APP_URL . '/provider/bookings');
+        }
+    }
+
+    /**
      * Display provider profile
      */
     public function profile() {
@@ -418,5 +480,75 @@ class ServiceProviderController extends Controller {
         ];
 
         return $stats;
+    }
+
+    public function renderBookingTable($bookings) {
+        ?>
+        <div class="table-responsive">
+            <table class="table table-hover booking-table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($bookings as $booking): ?>
+                        <tr>
+                        <td><?= htmlspecialchars($booking['client_first_name'] . ' ' . $booking['client_last_name']) ?></td>
+                            <td><?= htmlspecialchars($booking['service_name']) ?></td>
+                            <td><?= date('M d, Y', strtotime($booking['booking_date'])) ?></td>
+                            <td><?= date('h:i A', strtotime($booking['start_time'])) ?></td>
+                            <td><span class="badge bg-<?= $this->getStatusBadgeClass($booking['status']) ?>"><?= ucfirst($booking['status']) ?></span></td>
+                            <td>$<?= number_format($booking['total_price'], 2) ?></td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="<?= APP_URL ?>/provider/bookings/view/<?= $booking['id'] ?>" 
+                                       class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <?php if ($booking['status'] == 'pending'): ?>
+                                        <a href="<?= APP_URL ?>/provider/bookings/confirm/<?= $booking['id'] ?>" 
+                                           class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Confirm">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if ($booking['status'] == 'confirmed'): ?>
+                                        <a href="<?= APP_URL ?>/provider/bookings/complete/<?= $booking['id'] ?>" 
+                                           class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Mark Complete">
+                                            <i class="fas fa-check-double"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php
+    }
+
+    /**
+     * Get Bootstrap badge class based on booking status
+     */
+    public function getStatusBadgeClass($status) {
+        switch (strtolower($status)) {
+            case 'pending':
+                return 'warning';
+            case 'confirmed':
+                return 'info';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
     }
 }
